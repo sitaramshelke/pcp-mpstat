@@ -1,6 +1,6 @@
 from pcp import pmapi
 
-class NameInterrupts:
+class NamedInterrupts:
     def __init__(self):
         self.context = None
         self.interrupt_list = []
@@ -10,10 +10,10 @@ class NameInterrupts:
 
     def GetAllNamedInterrupts(self):
         self.context = pmapi.pmContext()
-        self.context.pmTraversePMNS("kernel.percpu.interrupts",self.PrintCallback)
+        self.context.pmTraversePMNS("kernel.percpu.interrupts",self.AppendCallback)
         return self.interrupt_list
 
 if __name__ == '__main__':
-    namedInt = NameInterrupts()
+    namedInt = NamedInterrupts()
     interrupt_list = namedInt.GetAllNamedInterrupts()
     print interrupt_list
