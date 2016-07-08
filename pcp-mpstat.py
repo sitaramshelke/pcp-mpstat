@@ -5,7 +5,7 @@ class NameInterrupts:
         self.context = None
         self.interrupt_list = []
 
-    def PrintCallback(self, args):
+    def AppendCallback(self, args):
         self.interrupt_list.append(args)
 
     def GetAllNamedInterrupts(self):
