@@ -4,10 +4,10 @@ import sys
 MPSTAT_METRICS = ['pmda.uname', 'hinv.map.cpu_num', 'hinv.ncpu', 'hinv.cpu.online', 'kernel.all.cpu.user',
                 'kernel.all.cpu.nice', 'kernel.all.cpu.sys', 'kernel.all.cpu.wait.total',
                 'kernel.all.cpu.irq.hard', 'kernel.all.cpu.irq.soft', 'kernel.all.cpu.steal',
-                'kernel.all.cpu.vuser', 'kernel.all.cpu.vnice', 'kernel.all.cpu.idle',
+                'kernel.all.cpu.guest', 'kernel.all.cpu.guest_nice', 'kernel.all.cpu.idle',
                 'kernel.percpu.cpu.user', 'kernel.percpu.cpu.nice', 'kernel.percpu.cpu.sys',
                 'kernel.percpu.cpu.wait.total', 'kernel.percpu.cpu.irq.hard', 'kernel.percpu.cpu.irq.soft',
-                'kernel.percpu.cpu.steal', 'kernel.percpu.cpu.vuser','kernel.percpu.cpu.vnice',
+                'kernel.percpu.cpu.steal', 'kernel.percpu.cpu.guest','kernel.percpu.cpu.guest_nice',
                 'kernel.percpu.cpu.idle']
 
 class NamedInterrupts:
@@ -86,15 +86,14 @@ class CoreCpuUtil:
         self.delta_time = delta_time
         self.instance = instance
         self.metric_repository = metric_repository
+    def __all_or_percpu(self):
+        return 'all' if self.instance is None else 'percpu'
     def cpu_number(self):
         return self.instance
     def cpu_online(self):
         return self.metric_repository.current_value('hinv.cpu.online', self.instance)
     def user_time(self):
-        if self.instance is not None:
-            metric = 'kernel.percpu.cpu.user'
-        else:
-            metric = 'kernel.all.cpu.user'
+        metric = 'kernel.' + self.__all_or_percpu() + '.cpu.user'
         p_time = self.metric_repository.previous_value(metric, self.instance)
         c_time = self.metric_repository.current_value(metric, self.instance)
         if p_time is not None and c_time is not None:
@@ -102,10 +101,7 @@ class CoreCpuUtil:
         else:
             return None
     def nice_time(self):
-        if self.instance is not None:
-            metric = 'kernel.percpu.cpu.nice'
-        else:
-            metric = 'kernel.all.cpu.nice'
+        metric = 'kernel.' + self.__all_or_percpu() + '.cpu.nice'
         p_time = self.metric_repository.previous_value(metric, self.instance)
         c_time = self.metric_repository.current_value(metric, self.instance)
         if p_time is not None and c_time is not None:
@@ -113,10 +109,7 @@ class CoreCpuUtil:
         else:
             return None
     def sys_time(self):
-        if self.instance is not None:
-            metric = 'kernel.percpu.cpu.sys'
-        else:
-            metric = 'kernel.all.cpu.sys'
+        metric = 'kernel.' + self.__all_or_percpu() + '.cpu.sys'
         p_time = self.metric_repository.previous_value(metric, self.instance)
         c_time = self.metric_repository.current_value(metric, self.instance)
         if p_time is not None and c_time is not None:
@@ -124,10 +117,7 @@ class CoreCpuUtil:
         else:
             return None
     def iowait_time(self):
-        if self.instance is not None:
-            metric = 'kernel.percpu.cpu.wait.total'
-        else:
-            metric = 'kernel.all.cpu.wait.total'
+        metric = 'kernel.' + self.__all_or_percpu() + '.cpu.wait.total'
         p_time = self.metric_repository.previous_value(metric, self.instance)
         c_time = self.metric_repository.current_value(metric, self.instance)
         if p_time is not None and c_time is not None:
@@ -135,10 +125,7 @@ class CoreCpuUtil:
         else:
             return None
     def irq_hard(self):
-        if self.instance is not None:
-            metric = 'kernel.percpu.cpu.irq.hard'
-        else:
-            metric = 'kernel.all.cpu.irq.hard'
+        metric = 'kernel.' + self.__all_or_percpu() + '.cpu.irq.hard'
         p_time = self.metric_repository.previous_value(metric, self.instance)
         c_time = self.metric_repository.current_value(metric, self.instance)
         if p_time is not None and c_time is not None:
@@ -146,10 +133,7 @@ class CoreCpuUtil:
         else:
             return None
     def irq_soft(self):
-        if self.instance is not None:
-            metric = 'kernel.percpu.cpu.irq.soft'
-        else:
-            metric = 'kernel.all.cpu.irq.soft'
+        metric = 'kernel.' + self.__all_or_percpu() + '.cpu.irq.soft'
         p_time = self.metric_repository.previous_value(metric, self.instance)
         c_time = self.metric_repository.current_value(metric, self.instance)
         if p_time is not None and c_time is not None:
@@ -157,10 +141,7 @@ class CoreCpuUtil:
         else:
             return None
     def steal(self):
-        if self.instance is not None:
-            metric = 'kernel.percpu.cpu.steal'
-        else:
-            metric = 'kernel.all.cpu.steal'
+        metric = 'kernel.' + self.__all_or_percpu() + '.cpu.steal'
         p_time = self.metric_repository.previous_value(metric, self.instance)
         c_time = self.metric_repository.current_value(metric, self.instance)
         if p_time is not None and c_time is not None:
@@ -168,36 +149,23 @@ class CoreCpuUtil:
         else:
             return None
     def guest_time(self):
-        if self.instance is not None:
-            u_metric = 'kernel.percpu.cpu.user'
-            v_metric = 'kernel.percpu.cpu.vuser'
-        else:
-            u_metric = 'kernel.all.cpu.user'
-            v_metric = 'kernel.all.cpu.vuser'
-        p_time = self.metric_repository.previous_value(u_metric, self.instance) - self.metric_repository.previous_value(v_metric, self.instance)
-        c_time = self.metric_repository.current_value(u_metric, self.instance) - self.metric_repository.current_value(v_metric, self.instance)
+        metric = 'kernel.' + self.__all_or_percpu() + '.cpu.guest'
+        p_time = self.metric_repository.previous_value(metric, self.instance)
+        c_time = self.metric_repository.current_value(metric, self.instance)
         if p_time is not None and c_time is not None:
             return ("%.2f"%((c_time - p_time)/self.delta_time))
         else:
             return None
     def guest_nice(self):
-        if self.instance is not None:
-            u_metric = 'kernel.percpu.cpu.nice'
-            v_metric = 'kernel.percpu.cpu.vnice'
-        else:
-            u_metric = 'kernel.all.cpu.nice'
-            v_metric = 'kernel.all.cpu.vnice'
-        p_time = self.metric_repository.previous_value(u_metric, self.instance) - self.metric_repository.previous_value(v_metric, self.instance)
-        c_time = self.metric_repository.current_value(u_metric, self.instance) - self.metric_repository.current_value(v_metric, self.instance)
+        metric = 'kernel.' + self.__all_or_percpu() + '.cpu.guest_nice'
+        p_time = self.metric_repository.previous_value(metric, self.instance)
+        c_time = self.metric_repository.current_value(metric, self.instance)
         if p_time is not None and c_time is not None:
             return ("%.2f"%((c_time - p_time)/self.delta_time))
         else:
             return None
     def idle_time(self):
-        if self.instance is not None:
-            metric = 'kernel.percpu.cpu.idle'
-        else:
-            metric = 'kernel.all.cpu.idle'
+        metric = 'kernel.' + self.__all_or_percpu() + '.cpu.idle'
         p_time = self.metric_repository.previous_value(metric, self.instance)
         c_time = self.metric_repository.current_value(metric, self.instance)
         if p_time is not None and c_time is not None:
@@ -236,7 +204,7 @@ class CpuFilter:
             else:
                 return False
         else:
-            return False
+            return True
 
 class CpuUtilReporter:
     def __init__(self, cpu_util, cpu_filter, mpstat_options):
