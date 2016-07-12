@@ -204,7 +204,7 @@ class CpuFilter:
             else:
                 return False
         else:
-            return True
+            return False
 
 class CpuUtilReporter:
     def __init__(self, cpu_util, cpu_filter, mpstat_options):
@@ -213,7 +213,7 @@ class CpuUtilReporter:
         self.mpstat_options = mpstat_options
     def print_report(self, timestamp):
         print("Timestamp\tCPU\t%usr\t%nice\tsys\t%iowait\t%irq\t%soft\t%steal\t%guest\t%gnice\t%idle")
-        if self.mpstat_options.cpu_list == 'ALL':
+        if self.mpstat_options.cpu_list == "ALL" or self.mpstat_options.cpu_list is None:
             cpu_util = self.cpu_util.get_totalcpu_util()
             print("%s\tALL\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s"%(timestamp, cpu_util.user_time(), cpu_util.nice_time(), cpu_util.sys_time(), cpu_util.iowait_time(), cpu_util.irq_hard(), cpu_util.irq_soft(), cpu_util.steal(), cpu_util.guest_time(), cpu_util.guest_nice(), cpu_util.idle_time()))
 
