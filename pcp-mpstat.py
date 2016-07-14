@@ -8,7 +8,7 @@ MPSTAT_METRICS = ['pmda.uname', 'hinv.map.cpu_num', 'hinv.ncpu', 'hinv.cpu.onlin
                 'kernel.percpu.cpu.user', 'kernel.percpu.cpu.nice', 'kernel.percpu.cpu.sys',
                 'kernel.percpu.cpu.wait.total', 'kernel.percpu.cpu.irq.hard', 'kernel.percpu.cpu.irq.soft',
                 'kernel.percpu.cpu.steal', 'kernel.percpu.cpu.guest','kernel.percpu.cpu.guest_nice',
-                'kernel.percpu.cpu.idle', 'kernel.all.cpu.intr']
+                'kernel.percpu.cpu.idle', 'kernel.all.intr']
 Interrupts_list = []
 Soft_Interrupts_list = []
 class NamedInterrupts:
@@ -99,7 +99,7 @@ class CoreCpuUtil:
         p_time = self.metric_repository.previous_value(metric, self.instance)
         c_time = self.metric_repository.current_value(metric, self.instance)
         if p_time is not None and c_time is not None:
-            return float("%.2f"%(((c_time - p_time)/self.delta_time)))
+            return float("%.2f"%((100*(c_time - p_time))/(1000*self.delta_time)))
         else:
             return None
     def nice_time(self):
@@ -107,7 +107,7 @@ class CoreCpuUtil:
         p_time = self.metric_repository.previous_value(metric, self.instance)
         c_time = self.metric_repository.current_value(metric, self.instance)
         if p_time is not None and c_time is not None:
-            return float("%.2f"%(((c_time - p_time)/self.delta_time)))
+            return float("%.2f"%((100*(c_time - p_time))/(1000*self.delta_time)))
         else:
             return None
     def sys_time(self):
@@ -115,7 +115,7 @@ class CoreCpuUtil:
         p_time = self.metric_repository.previous_value(metric, self.instance)
         c_time = self.metric_repository.current_value(metric, self.instance)
         if p_time is not None and c_time is not None:
-            return float("%.2f"%((c_time - p_time)/self.delta_time))
+            return float("%.2f"%((100*(c_time - p_time))/(1000*self.delta_time)))
         else:
             return None
     def iowait_time(self):
@@ -123,7 +123,7 @@ class CoreCpuUtil:
         p_time = self.metric_repository.previous_value(metric, self.instance)
         c_time = self.metric_repository.current_value(metric, self.instance)
         if p_time is not None and c_time is not None:
-            return float("%.2f"%((c_time - p_time)/self.delta_time))
+            return float("%.2f"%((100*(c_time - p_time))/(1000*self.delta_time)))
         else:
             return None
     def irq_hard(self):
@@ -131,7 +131,7 @@ class CoreCpuUtil:
         p_time = self.metric_repository.previous_value(metric, self.instance)
         c_time = self.metric_repository.current_value(metric, self.instance)
         if p_time is not None and c_time is not None:
-            return float("%.2f"%((c_time - p_time)/self.delta_time))
+            return float("%.2f"%((100*(c_time - p_time))/(1000*self.delta_time)))
         else:
             return None
     def irq_soft(self):
@@ -139,7 +139,7 @@ class CoreCpuUtil:
         p_time = self.metric_repository.previous_value(metric, self.instance)
         c_time = self.metric_repository.current_value(metric, self.instance)
         if p_time is not None and c_time is not None:
-            return float("%.2f"%((c_time - p_time)/self.delta_time))
+            return float("%.2f"%((100*(c_time - p_time))/(1000*self.delta_time)))
         else:
             return None
     def steal(self):
@@ -147,7 +147,7 @@ class CoreCpuUtil:
         p_time = self.metric_repository.previous_value(metric, self.instance)
         c_time = self.metric_repository.current_value(metric, self.instance)
         if p_time is not None and c_time is not None:
-            return float("%.2f"%((c_time - p_time)/self.delta_time))
+            return float("%.2f"%((100*(c_time - p_time))/(1000*self.delta_time)))
         else:
             return None
     def guest_time(self):
@@ -155,7 +155,7 @@ class CoreCpuUtil:
         p_time = self.metric_repository.previous_value(metric, self.instance)
         c_time = self.metric_repository.current_value(metric, self.instance)
         if p_time is not None and c_time is not None:
-            return float("%.2f"%((c_time - p_time)/self.delta_time))
+            return float("%.2f"%((100*(c_time - p_time))/(1000*self.delta_time)))
         else:
             return None
     def guest_nice(self):
@@ -163,7 +163,7 @@ class CoreCpuUtil:
         p_time = self.metric_repository.previous_value(metric, self.instance)
         c_time = self.metric_repository.current_value(metric, self.instance)
         if p_time is not None and c_time is not None:
-            return float("%.2f"%((c_time - p_time)/self.delta_time))
+            return float("%.2f"%((100*(c_time - p_time))/(1000*self.delta_time)))
         else:
             return None
     def idle_time(self):
@@ -171,7 +171,7 @@ class CoreCpuUtil:
         p_time = self.metric_repository.previous_value(metric, self.instance)
         c_time = self.metric_repository.current_value(metric, self.instance)
         if p_time is not None and c_time is not None:
-            return float("%.2f"%((c_time - p_time)/self.delta_time))
+            return float("%.2f"%((100*(c_time - p_time))/(1000*self.delta_time)))
         else:
             return None
 
@@ -191,8 +191,8 @@ class TotalInterruptUsage:
         self.delta_time = delta_time
         self.__metric_repository = metric_repository
     def total_interrupt_per_delta_time(self):
-        c_value = self.__metric_repository.current_value('kernel.all.cpu.intr', None)
-        p_value = self.__metric_repository.previous_value('kernel.all.cpu.intr', None)
+        c_value = self.__metric_repository.current_value('kernel.all.intr', None)
+        p_value = self.__metric_repository.previous_value('kernel.all.intr', None)
         if c_value is not None and p_value is not None:
             return float("%.2f"%(float(c_value - p_value)/self.delta_time))
         else:
