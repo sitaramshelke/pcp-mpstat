@@ -86,55 +86,55 @@ class TestCoreCpuUtil(unittest.TestCase):
 
 		user_time  = cpu_util.user_time()
 
-		self.assertEqual(user_time,2.99)
+		self.assertEqual(user_time,0.3)
 	def test_nice_time(self):
 		cpu_util = CoreCpuUtil(0, 1.34, self.__metric_repository)
 
 		nice_time  = cpu_util.nice_time()
 
-		self.assertEqual(nice_time,5.97)
+		self.assertEqual(nice_time,0.6)
 	def test_sys_time(self):
 		cpu_util = CoreCpuUtil(0, 1.34, self.__metric_repository)
 
 		sys_time  = cpu_util.sys_time()
 
-		self.assertEqual(sys_time,8.21)
+		self.assertEqual(sys_time,0.82)
 	def test_iowait_time(self):
 		cpu_util = CoreCpuUtil(0, 1.34, self.__metric_repository)
 
 		iowait_time  = cpu_util.iowait_time()
 
-		self.assertEqual(iowait_time,5.97)
+		self.assertEqual(iowait_time,0.6)
 	def test_irq_hard(self):
 		cpu_util = CoreCpuUtil(0, 1.34, self.__metric_repository)
 
 		irq_hard  = cpu_util.irq_hard()
 
-		self.assertEqual(irq_hard,1.49)
+		self.assertEqual(irq_hard,0.15)
 	def test_irq_soft(self):
 		cpu_util = CoreCpuUtil(0, 1.34, self.__metric_repository)
 
 		irq_soft  = cpu_util.irq_soft()
 
-		self.assertEqual(irq_soft,1.49)
+		self.assertEqual(irq_soft,0.15)
 	def test_guest_time(self):
 		cpu_util = CoreCpuUtil(0, 1.34, self.__metric_repository)
 
 		guest_time  = cpu_util.guest_time()
 
-		self.assertEqual(guest_time,5.97)
+		self.assertEqual(guest_time,0.6)
 	def test_guest_nice(self):
 		cpu_util = CoreCpuUtil(0, 1.34, self.__metric_repository)
 
 		guest_nice  = cpu_util.guest_nice()
 
-		self.assertEqual(guest_nice,5.22)
+		self.assertEqual(guest_nice,0.52)
 	def test_idle_time(self):
 		cpu_util = CoreCpuUtil(0, 1.34, self.__metric_repository)
 
 		idle_time  = cpu_util.idle_time()
 
-		self.assertEqual(idle_time,2.24)
+		self.assertEqual(idle_time,0.22)
 
 	def test_user_time_if_previous_value_is_none(self):
 		cpu_util = CoreCpuUtil(1, 1.34, self.__metric_repository)

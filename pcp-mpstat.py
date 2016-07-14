@@ -17,12 +17,12 @@ class NamedInterrupts:
         self.interrupt_list = []
         self.metric = metric
 
-    def AppendCallback(self, args):
+    def append_callback(self, args):
         self.interrupt_list.append(args)
 
-    def GetAllNamedInterrupts(self):
+    def get_all_named_interrupts(self):
         self.context = pmapi.pmContext()
-        self.context.pmTraversePMNS(self.metric,self.AppendCallback)
+        self.context.pmTraversePMNS(self.metric,self.append_callback)
         return self.interrupt_list
 
 class ReportingMetricRepository:
@@ -30,6 +30,7 @@ class ReportingMetricRepository:
         self.group = group
         self.current_cached_values = {}
         self.previous_cached_values = {}
+
     def __fetch_current_values(self,metric,instance):
         if instance is not None:
             return dict(map(lambda x: (x[0].inst, x[2]), self.group[metric].netValues))
@@ -88,12 +89,16 @@ class CoreCpuUtil:
         self.delta_time = delta_time
         self.instance = instance
         self.metric_repository = metric_repository
+    
     def __all_or_percpu(self):
         return 'all' if self.instance is None else 'percpu'
+
     def cpu_number(self):
         return self.instance
+
     def cpu_online(self):
         return self.metric_repository.current_value('hinv.cpu.online', self.instance)
+
     def user_time(self):
         metric = 'kernel.' + self.__all_or_percpu() + '.cpu.user'
         p_time = self.metric_repository.previous_value(metric, self.instance)
@@ -102,6 +107,7 @@ class CoreCpuUtil:
             return float("%.2f"%((100*(c_time - p_time))/(1000*self.delta_time)))
         else:
             return None
+
     def nice_time(self):
         metric = 'kernel.' + self.__all_or_percpu() + '.cpu.nice'
         p_time = self.metric_repository.previous_value(metric, self.instance)
@@ -110,6 +116,7 @@ class CoreCpuUtil:
             return float("%.2f"%((100*(c_time - p_time))/(1000*self.delta_time)))
         else:
             return None
+
     def sys_time(self):
         metric = 'kernel.' + self.__all_or_percpu() + '.cpu.sys'
         p_time = self.metric_repository.previous_value(metric, self.instance)
@@ -118,6 +125,7 @@ class CoreCpuUtil:
             return float("%.2f"%((100*(c_time - p_time))/(1000*self.delta_time)))
         else:
             return None
+
     def iowait_time(self):
         metric = 'kernel.' + self.__all_or_percpu() + '.cpu.wait.total'
         p_time = self.metric_repository.previous_value(metric, self.instance)
@@ -126,6 +134,7 @@ class CoreCpuUtil:
             return float("%.2f"%((100*(c_time - p_time))/(1000*self.delta_time)))
         else:
             return None
+
     def irq_hard(self):
         metric = 'kernel.' + self.__all_or_percpu() + '.cpu.irq.hard'
         p_time = self.metric_repository.previous_value(metric, self.instance)
@@ -134,6 +143,7 @@ class CoreCpuUtil:
             return float("%.2f"%((100*(c_time - p_time))/(1000*self.delta_time)))
         else:
             return None
+
     def irq_soft(self):
         metric = 'kernel.' + self.__all_or_percpu() + '.cpu.irq.soft'
         p_time = self.metric_repository.previous_value(metric, self.instance)
@@ -142,6 +152,7 @@ class CoreCpuUtil:
             return float("%.2f"%((100*(c_time - p_time))/(1000*self.delta_time)))
         else:
             return None
+
     def steal(self):
         metric = 'kernel.' + self.__all_or_percpu() + '.cpu.steal'
         p_time = self.metric_repository.previous_value(metric, self.instance)
@@ -150,6 +161,7 @@ class CoreCpuUtil:
             return float("%.2f"%((100*(c_time - p_time))/(1000*self.delta_time)))
         else:
             return None
+
     def guest_time(self):
         metric = 'kernel.' + self.__all_or_percpu() + '.cpu.guest'
         p_time = self.metric_repository.previous_value(metric, self.instance)
@@ -166,6 +178,7 @@ class CoreCpuUtil:
             return float("%.2f"%((100*(c_time - p_time))/(1000*self.delta_time)))
         else:
             return None
+
     def idle_time(self):
         metric = 'kernel.' + self.__all_or_percpu() + '.cpu.idle'
         p_time = self.metric_repository.previous_value(metric, self.instance)
@@ -179,17 +192,22 @@ class CpuUtil:
     def __init__(self, delta_time, metric_repository):
         self.__metric_repository = metric_repository
         self.delta_time = delta_time
+    
     def get_totalcpu_util(self):
         return CoreCpuUtil(None, self.delta_time, self.__metric_repository)
+
     def get_percpu_util(self):
         return map((lambda cpuid: (CoreCpuUtil(cpuid, self.delta_time, self.__metric_repository))), self.__cpus())
+
     def __cpus(self):
         cpu_dict = self.__metric_repository.current_values('hinv.map.cpu_num')
         return sorted(cpu_dict.values())
+
 class TotalInterruptUsage:
     def __init__(self, delta_time, metric_repository):
         self.delta_time = delta_time
         self.__metric_repository = metric_repository
+    
     def total_interrupt_per_delta_time(self):
         c_value = self.__metric_repository.current_value('kernel.all.intr', None)
         p_value = self.__metric_repository.previous_value('kernel.all.intr', None)
@@ -197,10 +215,12 @@ class TotalInterruptUsage:
             return float("%.2f"%(float(c_value - p_value)/self.delta_time))
         else:
             return None
+
 class InterruptUsage:
     def __init__(self, delta_time, metric_repository):
         self.delta_time = delta_time
         self.__metric_repository = metric_repository
+    
     def interrupt_per_delta_time(self, metric, instance):
         c_value = self.__metric_repository.current_value(metric, instance)
         p_value = self.__metric_repository.previous_value(metric, instance)
@@ -209,23 +229,49 @@ class InterruptUsage:
         else:
             return None
     
-class Hard_InterruptUsage:
+class HardInterruptUsage:
     def __init__(self, delta_time, metric_repository, interrupt_list):
         self.delta_time = delta_time
         self.metric_repository = metric_repository
         self.interrupt_list = interrupt_list
+    
     def __cpus(self):
         cpu_dict = self.metric_repository.current_values('hinv.map.cpu_num')
         return sorted(cpu_dict.values())
+    
     def __get_all_interrupts_for_cpu(self, cpuid):
         interrupt_map  = {}
         for interrupt in self.interrupt_list:
             name = interrupt[interrupt.rfind('.')+1:]
             if name.find('line') != -1:
                 name = name[4:]
+            name = name+'/s'
             value = InterruptUsage(self.delta_time, self.metric_repository).interrupt_per_delta_time(interrupt, cpuid)
             interrupt_map[name] = value
         return interrupt_map
+    
+    def get_percpu_interrupts(self):
+        return map((lambda cpuid: ({cpuid:self.__get_all_interrupts_for_cpu(cpuid)})), self.__cpus())
+
+class SoftInterruptUsage:
+    def __init__(self, delta_time, metric_repository, interrupt_list):
+        self.delta_time = delta_time
+        self.metric_repository = metric_repository
+        self.interrupt_list = interrupt_list
+    
+    def __cpus(self):
+        cpu_dict = self.metric_repository.current_values('hinv.map.cpu_num')
+        return sorted(cpu_dict.values())
+    
+    def __get_all_interrupts_for_cpu(self, cpuid):
+        interrupt_map  = {}
+        for interrupt in self.interrupt_list:
+            name = interrupt[interrupt.rfind('.')+1:]
+            name = name+'/s'
+            value = InterruptUsage(self.delta_time, self.metric_repository).interrupt_per_delta_time(interrupt, cpuid)
+            interrupt_map[name] = value
+        return interrupt_map
+    
     def get_percpu_interrupts(self):
         return map((lambda cpuid: ({cpuid:self.__get_all_interrupts_for_cpu(cpuid)})), self.__cpus())
 
@@ -233,10 +279,13 @@ class Hard_InterruptUsage:
 class CpuFilter:
     def __init__(self, options):
         self.options = options
+    
     def filter_cpus(self, cpus):
         return filter(lambda c: self.__predicate(c), cpus)
+    
     def __predicate(self, cpu):
         return self.__matches_cpu(cpu)
+    
     def __matches_cpu(self, cpu):
         if self.options.cpu_list == 'ALL':
             return True
@@ -258,8 +307,9 @@ class CpuUtilReporter:
         self.cpu_util = cpu_util
         self.cpu_filter = cpu_filter
         self.mpstat_options = mpstat_options
+    
     def print_report(self, timestamp):
-        print("Timestamp\tCPU\t%usr\t%nice\tsys\t%iowait\t%irq\t%soft\t%steal\t%guest\t%gnice\t%idle")
+        print("Timestamp\tCPU\t%usr\t%nice\t%sys\t%iowait\t%irq\t%soft\t%steal\t%guest\t%gnice\t%idle")
         if self.mpstat_options.cpu_list == "ALL" or self.mpstat_options.cpu_list is None:
             cpu_util = self.cpu_util.get_totalcpu_util()
             print("%s\tALL\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s"%(timestamp, cpu_util.user_time(), cpu_util.nice_time(), cpu_util.sys_time(), cpu_util.iowait_time(), cpu_util.irq_hard(), cpu_util.irq_soft(), cpu_util.steal(), cpu_util.guest_time(), cpu_util.guest_nice(), cpu_util.idle_time()))
@@ -272,6 +322,7 @@ class TotalInterruptUsageReporter:
     def __init__(self, total_interrupt_usage, mpstat_options):
         self.total_interrupt_usage = total_interrupt_usage
         self.mpstat_options = mpstat_options
+    
     def print_report(self, timestamp):
         print("Timestamp\tCPU\t%intr/s")
         print("%s\tall\t%s"%(timestamp,self.total_interrupt_usage.total_interrupt_per_delta_time()))
@@ -280,8 +331,31 @@ class HardInterruptUsageReporter:
     def __init__(self, hard_interrupt_usage, mpstat_options):
         self.hard_interrupt_usage = hard_interrupt_usage
         self. mpstat_options = mpstat_options
+    
     def print_report(self, timestamp):
         cpu_interrupts = self.hard_interrupt_usage.get_percpu_interrupts()
+        # print cpu_interrupts
+        header = "Timestamp\tcpu\t"
+        for key in cpu_interrupts[0].values()[0].keys():
+            header += key+"\t"
+        print header
+        for cpu_interrupt in cpu_interrupts:
+            cpu_id = cpu_interrupt.keys()[0]
+            values = (timestamp, cpu_id)
+            format_str = ("%s\t%s\t")
+            interrupt_values = cpu_interrupts[cpu_id][cpu_id].values()
+            for interrupt_value  in interrupt_values:
+                values += (interrupt_value,)
+                format_str += "%s\t"
+            print(format_str%values)
+
+class SoftInterruptUsageReporter:
+    def __init__(self, soft_interrupt_usage, mpstat_options):
+        self.soft_interrupt_usage = soft_interrupt_usage
+        self. mpstat_options = mpstat_options
+    
+    def print_report(self, timestamp):
+        cpu_interrupts = self.soft_interrupt_usage.get_percpu_interrupts()
         # print cpu_interrupts
         header = "Timestamp\tcpu\t"
         for key in cpu_interrupts[0].values()[0].keys():
@@ -305,6 +379,7 @@ class MpstatOptions(pmapi.pmOptions):
     interrupts_filter = False
     interrupt_type = None
     no_options = True
+
     def extraOptions(self, opt,optarg, index):
         MpstatOptions.no_options = False
         if opt == 'A':
@@ -323,6 +398,7 @@ class MpstatOptions(pmapi.pmOptions):
                 except ValueError as e:
                     print ("Invalid CPU List: use comma separated cpu nos without whitespaces")
                     sys.exit(1)
+    
     def override(self, opt):
         """ Override standard PCP options to match mpstat(1) """
         if (opt == 'A'):
@@ -373,8 +449,12 @@ class MpstatReport(pmcc.MetricGroupPrinter):
             reporter = TotalInterruptUsageReporter(total_interrupt_usage, MpstatOptions)
             reporter.print_report(timestamp[3])
         if MpstatOptions.interrupts_filter == True and (MpstatOptions.interrupt_type == "CPU" or MpstatOptions.interrupt_type == "ALL"):
-            hard_interrupt_usage = Hard_InterruptUsage(interval_in_seconds, metric_repository, Interrupts_list)
+            hard_interrupt_usage = HardInterruptUsage(interval_in_seconds, metric_repository, Interrupts_list)
             reporter = HardInterruptUsageReporter(hard_interrupt_usage, MpstatOptions)
+            reporter.print_report(timestamp[3])
+        if MpstatOptions.interrupts_filter == True and (MpstatOptions.interrupt_type == "SCPU" or MpstatOptions.interrupt_type == "ALL"):
+            soft_interrupt_usage = SoftInterruptUsage(interval_in_seconds, metric_repository, Soft_Interrupts_list)
+            reporter = SoftInterruptUsageReporter(soft_interrupt_usage, MpstatOptions)
             reporter.print_report(timestamp[3])
         if MpstatOptions.no_options == True or MpstatOptions.cpu_filter == True:
             cpu_util = CpuUtil(interval_in_seconds, metric_repository)
@@ -384,15 +464,13 @@ class MpstatReport(pmcc.MetricGroupPrinter):
 
 
 
-
-
 if __name__ == '__main__':
     Interrupts = NamedInterrupts('kernel.percpu.interrupts')
     Soft_Interrupts = NamedInterrupts('kernel.percpu.softirqs')
-    Interrupts_list = Interrupts.GetAllNamedInterrupts()
-    # Soft_Interrupts_list = Soft_Interrupts.GetAllNamedInterrupts()
+    Interrupts_list = Interrupts.get_all_named_interrupts()
+    Soft_Interrupts_list = Soft_Interrupts.get_all_named_interrupts()
     MPSTAT_METRICS += Interrupts_list
-    # MPSTAT_METRICS += Soft_Interrupts_list
+    MPSTAT_METRICS += Soft_Interrupts_list
     
     try:
         opts = MpstatOptions()
