@@ -383,7 +383,10 @@ class MpstatOptions(pmapi.pmOptions):
     def extraOptions(self, opt,optarg, index):
         MpstatOptions.no_options = False
         if opt == 'A':
-            MpstatOptions.options_all = True
+            MpstatOptions.interrupts_filter = True
+            MpstatOptions.interrupt_type = 'ALL'
+            MpstatOptions.cpu_filter = True
+            MpstatOptions.cpu_list = 'ALL'
         elif opt == "I":
             MpstatOptions.interrupts_filter = True
             MpstatOptions.interrupt_type = optarg
@@ -406,9 +409,13 @@ class MpstatOptions(pmapi.pmOptions):
         return 0
 
     def __init__(self):
-        pmapi.pmOptions.__init__(self,"AP:I:V?")
+        pmapi.pmOptions.__init__(self,"a:s:t:AP:I:V?")
         self.pmSetOptionCallback(self.extraOptions)
         self.pmSetOverrideCallback(self.override)
+        self.pmSetLongOptionHeader("General options")
+        self.pmSetLongOptionArchive()
+        self.pmSetLongOptionSamples()
+        self.pmSetLongOptionInterval()
         self.pmSetLongOptionVersion()
         self.pmSetLongOptionHelp()
         self.pmSetLongOption("",0,"A","","Similar to -P ALL -I ALL")
@@ -444,6 +451,11 @@ class MpstatReport(pmcc.MetricGroupPrinter):
         ncpu = self.get_ncpu(group)
         metric_repository = ReportingMetricRepository(group)
         
+        if MpstatOptions.no_options == True or MpstatOptions.cpu_filter == True:
+            cpu_util = CpuUtil(interval_in_seconds, metric_repository)
+            cpu_filter = CpuFilter(MpstatOptions)
+            reporter = CpuUtilReporter(cpu_util, cpu_filter, MpstatOptions)
+            reporter.print_report(timestamp[3])
         if MpstatOptions.interrupts_filter == True and (MpstatOptions.interrupt_type == "SUM" or MpstatOptions.interrupt_type == "ALL"):
             total_interrupt_usage = TotalInterruptUsage(interval_in_seconds, metric_repository)
             reporter = TotalInterruptUsageReporter(total_interrupt_usage, MpstatOptions)
@@ -456,11 +468,7 @@ class MpstatReport(pmcc.MetricGroupPrinter):
             soft_interrupt_usage = SoftInterruptUsage(interval_in_seconds, metric_repository, Soft_Interrupts_list)
             reporter = SoftInterruptUsageReporter(soft_interrupt_usage, MpstatOptions)
             reporter.print_report(timestamp[3])
-        if MpstatOptions.no_options == True or MpstatOptions.cpu_filter == True:
-            cpu_util = CpuUtil(interval_in_seconds, metric_repository)
-            cpu_filter = CpuFilter(MpstatOptions)
-            reporter = CpuUtilReporter(cpu_util, cpu_filter, MpstatOptions)
-            reporter.print_report(timestamp[3])
+        
 
 
 
