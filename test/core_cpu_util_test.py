@@ -110,7 +110,7 @@ class TestCoreCpuUtil(unittest.TestCase):
 
 		irq_hard  = cpu_util.irq_hard()
 
-		self.assertEqual(irq_hard,0.15)
+		self.assertEqual(irq_hard,0.15	)
 	def test_irq_soft(self):
 		cpu_util = CoreCpuUtil(0, 1.34, self.__metric_repository)
 
