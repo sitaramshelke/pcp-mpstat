@@ -248,8 +248,7 @@ class HardInterruptUsage:
         for interrupt in self.interrupt_list:
             name = interrupt[interrupt.rfind('.')+1:]
             if name.find('line') != -1:
-                name = name[4:]
-            name = name+'/s'
+                name = int(name[4:])
             value = InterruptUsage(self.delta_time, self.metric_repository).interrupt_per_delta_time(interrupt, cpuid)
             interrupt_map[name] = value
         return interrupt_map
@@ -332,18 +331,21 @@ class HardInterruptUsageReporter:
     
     def print_report(self, timestamp):
         cpu_interrupts = self.hard_interrupt_usage.get_percpu_interrupts()
+        # print cpu_interrupts
+        cpu_interrupts_list = sorted(cpu_interrupts[0].values()[0].keys())
         header_values = ("Timestamp","cpu")
         format_str = "%10s\t%4s\t"
-        for key in cpu_interrupts[0].values()[0].keys():
-            format_str += "%"+str(len(key))+"s\t"
-            header_values += (key,)
+        for cpu_interrupt in cpu_interrupts_list:
+            cpu_interrupt = str(cpu_interrupt)+"/s"
+            format_str += "%"+str(len(cpu_interrupt))+"s\t"
+            header_values += (cpu_interrupt,)
         print(format_str%header_values)
         for cpu_interrupt in cpu_interrupts:
             cpu_id = cpu_interrupt.keys()[0]
             values = (timestamp, cpu_id)
-            interrupt_values = cpu_interrupts[cpu_id][cpu_id].values()
-            for interrupt_value  in interrupt_values:
-                values += (interrupt_value,)
+            interrupt_values = cpu_interrupts[cpu_id][cpu_id]
+            for cpu_interrupt in cpu_interrupts_list:
+                values += (interrupt_values[cpu_interrupt],)
             print(format_str%values)
 
 class SoftInterruptUsageReporter:
