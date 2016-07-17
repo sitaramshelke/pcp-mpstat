@@ -221,11 +221,16 @@ class TotalInterruptUsage:
 
 class InterruptUsage:
     def __init__(self, delta_time, metric_repository, metric, instance):
-        self.name = metric.split('.')[-1]
+        self.__name = metric.split('.')[-1]
         self.instance = instance
         self.metric = metric
         self.delta_time = delta_time
         self.__metric_repository = metric_repository
+
+    def name(self):
+        if self.__name.startswith("line"):
+            return self.__name[4:]
+        return self.__name
 
     def value(self):
         c_value = self.__metric_repository.current_value(self.metric, self.instance)
@@ -339,8 +344,8 @@ class HardInterruptUsageReporter:
 
         # use the first CPU in cpu_interrupts to get the interrupt names
         for interrupt in cpu_interrupts[0].interrupts:
-            format_str += "%"+str(len(interrupt.name))+"s\t"
-            header_values += (interrupt.name,)
+            format_str += "%"+str(len(interrupt.name()))+"s\t"
+            header_values += (interrupt.name() + "/s",)
         print(format_str % header_values)
 
         for cpu_interrupt in cpu_interrupts:
