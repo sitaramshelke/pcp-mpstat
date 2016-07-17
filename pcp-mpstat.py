@@ -10,7 +10,6 @@ MPSTAT_METRICS = ['pmda.uname', 'hinv.map.cpu_num', 'hinv.ncpu', 'hinv.cpu.onlin
                 'kernel.percpu.cpu.steal', 'kernel.percpu.cpu.guest','kernel.percpu.cpu.guest_nice',
                 'kernel.percpu.cpu.idle', 'kernel.all.intr']
 Interrupts_list = []
-Interrupts_names_list = []
 Soft_Interrupts_list = []
 class NamedInterrupts:
     def __init__(self, metric):
@@ -22,13 +21,11 @@ class NamedInterrupts:
         self.interrupt_list.append(args)
 
     def get_all_named_interrupt_metrics(self):
-        self.context = pmapi.pmContext()
-        self.context.pmTraversePMNS(self.metric,self.append_callback)
-        self.interrupt_list.reverse()
+        if not self.interrupt_list:
+            self.context = pmapi.pmContext()
+            self.context.pmTraversePMNS(self.metric,self.append_callback)
+            self.interrupt_list.reverse()
         return self.interrupt_list
-    def get_all_interrupt_names(self):
-        names_list = map(lambda metric_name: metric_name[metric_name.rfind('.')+1:], self.interrupt_list)
-        return names_list
 
 class ReportingMetricRepository:
     def __init__(self,group):
@@ -223,38 +220,41 @@ class TotalInterruptUsage:
             return None
 
 class InterruptUsage:
-    def __init__(self, delta_time, metric_repository):
+    def __init__(self, delta_time, metric_repository, metric, instance):
+        self.name = metric.split('.')[-1]
+        self.instance = instance
+        self.metric = metric
         self.delta_time = delta_time
         self.__metric_repository = metric_repository
-    
-    def interrupt_per_delta_time(self, metric, instance):
-        c_value = self.__metric_repository.current_value(metric, instance)
-        p_value = self.__metric_repository.previous_value(metric, instance)
+
+    def value(self):
+        c_value = self.__metric_repository.current_value(self.metric, self.instance)
+        p_value = self.__metric_repository.previous_value(self.metric, self.instance)
         if c_value is not None and p_value is not None:
             return float("%.2f"%((c_value - p_value)/self.delta_time))
         else:
             return None
-    
+
+class CpuInterrupts:
+    def __init__(self, cpu_number, interrupts):
+        self.cpu_number = cpu_number
+        self.interrupts = interrupts
+
 class HardInterruptUsage:
-    def __init__(self, delta_time, metric_repository, interrupt_list):
+    def __init__(self, delta_time, metric_repository, interrupt_metrics):
         self.delta_time = delta_time
         self.metric_repository = metric_repository
-        self.interrupt_list = interrupt_list
+        self.interrupt_metrics = interrupt_metrics
     
     def get_percpu_interrupts(self):
-        return map((lambda cpuid: ({cpuid:self.__get_all_interrupts_for_cpu(cpuid)})), self.__cpus())
-    
+        return map((lambda cpuid: CpuInterrupts(cpuid, self.__get_all_interrupts_for_cpu(cpuid))), self.__cpus())
+
     def __cpus(self):
         cpu_dict = self.metric_repository.current_values('hinv.map.cpu_num')
         return sorted(cpu_dict.values())
     
     def __get_all_interrupts_for_cpu(self, cpuid):
-        interrupt_map  = {}
-        for interrupt in self.interrupt_list:
-            name = interrupt[interrupt.rfind('.')+1:]
-            value = InterruptUsage(self.delta_time, self.metric_repository).interrupt_per_delta_time(interrupt, cpuid)
-            interrupt_map[name] = value
-        return interrupt_map
+        return map((lambda metric: InterruptUsage(self.delta_time, self.metric_repository, metric, cpuid)), self.interrupt_metrics)
 
 class SoftInterruptUsage:
     def __init__(self, delta_time, metric_repository, interrupt_list):
@@ -336,20 +336,16 @@ class HardInterruptUsageReporter:
         cpu_interrupts = self.hard_interrupt_usage.get_percpu_interrupts()
         header_values = ("Timestamp","cpu")
         format_str = "%10s\t%4s\t"
-        for cpu_interrupt in Interrupts_names_list:
-            if cpu_interrupt.find('line') != -1:
-                cpu_interrupt = cpu_interrupt[4:]
-            cpu_interrupt = str(cpu_interrupt)+"/s"
-            format_str += "%"+str(len(cpu_interrupt))+"s\t"
-            header_values += (cpu_interrupt,)
-        print(format_str%header_values)
+
+        # use the first CPU in cpu_interrupts to get the interrupt names
+        for interrupt in cpu_interrupts[0].interrupts:
+            format_str += "%"+str(len(interrupt.name))+"s\t"
+            header_values += (interrupt.name,)
+        print(format_str % header_values)
+
         for cpu_interrupt in cpu_interrupts:
-            cpu_id = cpu_interrupt.keys()[0]
-            values = (timestamp, cpu_id)
-            interrupt_values = cpu_interrupts[cpu_id][cpu_id]
-            for cpu_interrupt in Interrupts_names_list:
-                values += (interrupt_values[cpu_interrupt],)
-            print(format_str%values)
+            values = (timestamp, cpu_interrupt.cpu_number) + tuple(map((lambda interrupt: interrupt.value()), cpu_interrupt.interrupts))
+            print(format_str % values)
 
 class SoftInterruptUsageReporter:
     def __init__(self, soft_interrupt_usage, mpstat_options):
@@ -476,7 +472,6 @@ if __name__ == '__main__':
     Interrupts = NamedInterrupts('kernel.percpu.interrupts')
     Soft_Interrupts = NamedInterrupts('kernel.percpu.softirqs')
     Interrupts_list = Interrupts.get_all_named_interrupt_metrics()
-    Interrupts_names_list = Interrupts.get_all_interrupt_names()
     Soft_Interrupts_list = Soft_Interrupts.get_all_named_interrupt_metrics()
     MPSTAT_METRICS += Interrupts_list
     MPSTAT_METRICS += Soft_Interrupts_list
