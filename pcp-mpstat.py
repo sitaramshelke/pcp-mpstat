@@ -281,10 +281,7 @@ class CpuFilter:
         self.options = options
     
     def filter_cpus(self, cpus):
-        return filter(lambda c: self.__predicate(c), cpus)
-    
-    def __predicate(self, cpu):
-        return self.__matches_cpu(cpu)
+        return filter(lambda c: self.__matches_cpu(c), cpus)
     
     def __matches_cpu(self, cpu):
         if self.options.cpu_list == 'ALL':
