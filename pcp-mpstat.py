@@ -31,18 +31,6 @@ class ReportingMetricRepository:
         self.current_cached_values = {}
         self.previous_cached_values = {}
 
-    def __fetch_current_values(self,metric,instance):
-        if instance is not None:
-            return dict(map(lambda x: (x[0].inst, x[2]), self.group[metric].netValues))
-        else:
-            return self.group[metric].netValues[0][2]
-
-    def __fetch_previous_values(self,metric,instance):
-        if instance is not None:
-            return dict(map(lambda x: (x[0].inst, x[2]), self.group[metric].netPrevValues))
-        else:
-            return self.group[metric].netPrevValues[0][2]
-
     def current_value(self, metric, instance):
         if not metric in self.group:
             return None
@@ -84,14 +72,24 @@ class ReportingMetricRepository:
             self.previous_cached_values[metric_name] = self.__fetch_previous_values(metric_name,True)
         return self.previous_cached_values.get(metric_name, None)
 
+    def __fetch_current_values(self,metric,instance):
+        if instance is not None:
+            return dict(map(lambda x: (x[0].inst, x[2]), self.group[metric].netValues))
+        else:
+            return self.group[metric].netValues[0][2]
+
+    def __fetch_previous_values(self,metric,instance):
+        if instance is not None:
+            return dict(map(lambda x: (x[0].inst, x[2]), self.group[metric].netPrevValues))
+        else:
+            return self.group[metric].netPrevValues[0][2]
+
+
 class CoreCpuUtil:
     def __init__(self, instance, delta_time, metric_repository):
         self.delta_time = delta_time
         self.instance = instance
         self.metric_repository = metric_repository
-    
-    def __all_or_percpu(self):
-        return 'all' if self.instance is None else 'percpu'
 
     def cpu_number(self):
         return self.instance
@@ -187,6 +185,9 @@ class CoreCpuUtil:
             return float("%.2f"%((100*(c_time - p_time))/(1000*self.delta_time)))
         else:
             return None
+    
+    def __all_or_percpu(self):
+        return 'all' if self.instance is None else 'percpu'
 
 class CpuUtil:
     def __init__(self, delta_time, metric_repository):
@@ -235,6 +236,9 @@ class HardInterruptUsage:
         self.metric_repository = metric_repository
         self.interrupt_list = interrupt_list
     
+    def get_percpu_interrupts(self):
+        return map((lambda cpuid: ({cpuid:self.__get_all_interrupts_for_cpu(cpuid)})), self.__cpus())
+    
     def __cpus(self):
         cpu_dict = self.metric_repository.current_values('hinv.map.cpu_num')
         return sorted(cpu_dict.values())
@@ -249,16 +253,16 @@ class HardInterruptUsage:
             value = InterruptUsage(self.delta_time, self.metric_repository).interrupt_per_delta_time(interrupt, cpuid)
             interrupt_map[name] = value
         return interrupt_map
-    
-    def get_percpu_interrupts(self):
-        return map((lambda cpuid: ({cpuid:self.__get_all_interrupts_for_cpu(cpuid)})), self.__cpus())
 
 class SoftInterruptUsage:
     def __init__(self, delta_time, metric_repository, interrupt_list):
         self.delta_time = delta_time
         self.metric_repository = metric_repository
         self.interrupt_list = interrupt_list
-    
+
+    def get_percpu_interrupts(self):
+        return map((lambda cpuid: ({cpuid:self.__get_all_interrupts_for_cpu(cpuid)})), self.__cpus())
+
     def __cpus(self):
         cpu_dict = self.metric_repository.current_values('hinv.map.cpu_num')
         return sorted(cpu_dict.values())
@@ -271,9 +275,6 @@ class SoftInterruptUsage:
             value = InterruptUsage(self.delta_time, self.metric_repository).interrupt_per_delta_time(interrupt, cpuid)
             interrupt_map[name] = value
         return interrupt_map
-    
-    def get_percpu_interrupts(self):
-        return map((lambda cpuid: ({cpuid:self.__get_all_interrupts_for_cpu(cpuid)})), self.__cpus())
 
 
 class CpuFilter:
