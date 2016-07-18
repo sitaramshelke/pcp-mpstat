@@ -425,7 +425,30 @@ class MpstatOptions(pmapi.pmOptions):
         self.pmSetLongOption("",1,"P","[1,3..|ON|ALL]","Filter or Show All/Online CPUs")
         self.pmSetLongOption("",1,"I","[SUM|CPU|SCPU|ALL]","Report Interrupt statistics")
 
+class DisplayOptions:
+    def display_cpu_usage_summary(self):
+        if MpstatOptions.no_options == True or MpstatOptions.cpu_filter == True:
+            return True
+        else:
+            return False
 
+    def display_total_cpu_usage(self):
+        if MpstatOptions.interrupts_filter == True and (MpstatOptions.interrupt_type == "SUM" or MpstatOptions.interrupt_type == "ALL"):
+            return True
+        else:
+            return False
+
+    def display_hard_interrupt_usage(self):
+        if MpstatOptions.interrupts_filter == True and (MpstatOptions.interrupt_type == "CPU" or MpstatOptions.interrupt_type == "ALL"):
+            return True
+        else:
+            return False
+
+    def display_soft_interrupts(self):
+        if MpstatOptions.interrupts_filter == True and (MpstatOptions.interrupt_type == "SCPU" or MpstatOptions.interrupt_type == "ALL"):
+            return True
+        else:
+            return False
 class MpstatReport(pmcc.MetricGroupPrinter):
     Machine_info_count = 0
 
@@ -453,21 +476,22 @@ class MpstatReport(pmcc.MetricGroupPrinter):
         interval_in_seconds = self.timeStampDelta(group)
         metric_repository = ReportingMetricRepository(group)
         stdout = StdoutPrinter()
+        display_options = DisplayOptions()
 
-        if MpstatOptions.no_options == True or MpstatOptions.cpu_filter == True:
+        if display_options.display_cpu_usage_summary():
             cpu_util = CpuUtil(interval_in_seconds, metric_repository)
             cpu_filter = CpuFilter(MpstatOptions)
             reporter = CpuUtilReporter(cpu_util, cpu_filter, stdout.Print, MpstatOptions)
             reporter.print_report(timestamp[3])
-        if MpstatOptions.interrupts_filter == True and (MpstatOptions.interrupt_type == "SUM" or MpstatOptions.interrupt_type == "ALL"):
+        if display_options.display_total_cpu_usage():
             total_interrupt_usage = TotalInterruptUsage(interval_in_seconds, metric_repository)
             reporter = TotalInterruptUsageReporter(total_interrupt_usage, stdout.Print, MpstatOptions)
             reporter.print_report(timestamp[3])
-        if MpstatOptions.interrupts_filter == True and (MpstatOptions.interrupt_type == "CPU" or MpstatOptions.interrupt_type == "ALL"):
+        if display_options.display_hard_interrupt_usage():
             hard_interrupt_usage = HardInterruptUsage(interval_in_seconds, metric_repository, Interrupts_list)
             reporter = HardInterruptUsageReporter(hard_interrupt_usage, stdout.Print, MpstatOptions)
             reporter.print_report(timestamp[3])
-        if MpstatOptions.interrupts_filter == True and (MpstatOptions.interrupt_type == "SCPU" or MpstatOptions.interrupt_type == "ALL"):
+        if display_options.display_soft_interrupts():
             soft_interrupt_usage = SoftInterruptUsage(interval_in_seconds, metric_repository, Soft_Interrupts_list)
             reporter = SoftInterruptUsageReporter(soft_interrupt_usage, stdout.Print, MpstatOptions)
             reporter.print_report(timestamp[3])
