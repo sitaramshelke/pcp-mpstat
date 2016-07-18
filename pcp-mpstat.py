@@ -262,26 +262,20 @@ class HardInterruptUsage:
         return map((lambda metric: InterruptUsage(self.delta_time, self.metric_repository, metric, cpuid)), self.interrupt_metrics)
 
 class SoftInterruptUsage:
-    def __init__(self, delta_time, metric_repository, interrupt_list):
+    def __init__(self, delta_time, metric_repository, interrupt_metrics):
         self.delta_time = delta_time
         self.metric_repository = metric_repository
-        self.interrupt_list = interrupt_list
+        self.interrupt_metrics = interrupt_metrics
 
     def get_percpu_interrupts(self):
-        return map((lambda cpuid: ({cpuid:self.__get_all_interrupts_for_cpu(cpuid)})), self.__cpus())
+        return map((lambda cpuid: CpuInterrupts(cpuid, self.__get_all_interrupts_for_cpu(cpuid))), self.__cpus())
 
     def __cpus(self):
         cpu_dict = self.metric_repository.current_values('hinv.map.cpu_num')
         return sorted(cpu_dict.values())
     
     def __get_all_interrupts_for_cpu(self, cpuid):
-        interrupt_map  = {}
-        for interrupt in self.interrupt_list:
-            name = interrupt[interrupt.rfind('.')+1:]
-            name = name+'/s'
-            value = InterruptUsage(self.delta_time, self.metric_repository).interrupt_per_delta_time(interrupt, cpuid)
-            interrupt_map[name] = value
-        return interrupt_map
+        return map((lambda metric: InterruptUsage(self.delta_time, self.metric_repository, metric, cpuid)), self.interrupt_metrics)
 
 
 class CpuFilter:
@@ -344,7 +338,7 @@ class HardInterruptUsageReporter:
 
         # use the first CPU in cpu_interrupts to get the interrupt names
         for interrupt in cpu_interrupts[0].interrupts:
-            format_str += "%"+str(len(interrupt.name()))+"s\t"
+            format_str += "%"+str(len(interrupt.name())+2)+"s\t"
             header_values += (interrupt.name() + "/s",)
         print(format_str % header_values)
 
@@ -361,17 +355,15 @@ class SoftInterruptUsageReporter:
         cpu_interrupts = self.soft_interrupt_usage.get_percpu_interrupts()
         header_values = ("Timestamp","cpu")
         format_str = "%10s\t%4s\t"
-        for key in cpu_interrupts[0].values()[0].keys():
-            format_str += "%"+str(len(key))+"s\t"
-            header_values += (key,)
-        print(format_str%header_values)
+         # use the first CPU in cpu_interrupts to get the interrupt names
+        for interrupt in cpu_interrupts[0].interrupts:
+            format_str += "%"+str(len(interrupt.name())+2)+"s\t"
+            header_values += (interrupt.name() + "/s",)
+        print(format_str % header_values)
+
         for cpu_interrupt in cpu_interrupts:
-            cpu_id = cpu_interrupt.keys()[0]
-            values = (timestamp, cpu_id)
-            interrupt_values = cpu_interrupts[cpu_id][cpu_id].values()
-            for interrupt_value  in interrupt_values:
-                values += (interrupt_value,)
-            print(format_str%values)
+            values = (timestamp, cpu_interrupt.cpu_number) + tuple(map((lambda interrupt: interrupt.value()), cpu_interrupt.interrupts))
+            print(format_str % values)
             
 
 class MpstatOptions(pmapi.pmOptions):
