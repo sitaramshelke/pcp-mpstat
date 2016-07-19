@@ -426,26 +426,29 @@ class MpstatOptions(pmapi.pmOptions):
         self.pmSetLongOption("",1,"I","[SUM|CPU|SCPU|ALL]","Report Interrupt statistics")
 
 class DisplayOptions:
+    def __init__(self, mpstatoptions):
+        self.mpstatoptions = mpstatoptions
+
     def display_cpu_usage_summary(self):
-        if MpstatOptions.no_options == True or MpstatOptions.cpu_filter == True:
+        if self.mpstatoptions.no_options == True or self.mpstatoptions.cpu_filter == True:
             return True
         else:
             return False
 
     def display_total_cpu_usage(self):
-        if MpstatOptions.interrupts_filter == True and (MpstatOptions.interrupt_type == "SUM" or MpstatOptions.interrupt_type == "ALL"):
+        if self.mpstatoptions.interrupts_filter == True and (self.mpstatoptions.interrupt_type == "SUM" or self.mpstatoptions.interrupt_type == "ALL"):
             return True
         else:
             return False
 
     def display_hard_interrupt_usage(self):
-        if MpstatOptions.interrupts_filter == True and (MpstatOptions.interrupt_type == "CPU" or MpstatOptions.interrupt_type == "ALL"):
+        if self.mpstatoptions.interrupts_filter == True and (self.mpstatoptions.interrupt_type == "CPU" or self.mpstatoptions.interrupt_type == "ALL"):
             return True
         else:
             return False
 
     def display_soft_interrupts(self):
-        if MpstatOptions.interrupts_filter == True and (MpstatOptions.interrupt_type == "SCPU" or MpstatOptions.interrupt_type == "ALL"):
+        if self.mpstatoptions.interrupts_filter == True and (self.mpstatoptions.interrupt_type == "SCPU" or self.mpstatoptions.interrupt_type == "ALL"):
             return True
         else:
             return False
@@ -476,7 +479,7 @@ class MpstatReport(pmcc.MetricGroupPrinter):
         interval_in_seconds = self.timeStampDelta(group)
         metric_repository = ReportingMetricRepository(group)
         stdout = StdoutPrinter()
-        display_options = DisplayOptions()
+        display_options = DisplayOptions(MpstatOptions)
 
         if display_options.display_cpu_usage_summary():
             cpu_util = CpuUtil(interval_in_seconds, metric_repository)
