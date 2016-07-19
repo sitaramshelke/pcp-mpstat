@@ -447,7 +447,7 @@ class DisplayOptions:
         else:
             return False
 
-    def display_soft_interrupts(self):
+    def display_soft_interrupt_usage(self):
         if self.mpstatoptions.interrupts_filter == True and (self.mpstatoptions.interrupt_type == "SCPU" or self.mpstatoptions.interrupt_type == "ALL"):
             return True
         else:
@@ -494,7 +494,7 @@ class MpstatReport(pmcc.MetricGroupPrinter):
             hard_interrupt_usage = HardInterruptUsage(interval_in_seconds, metric_repository, Interrupts_list)
             reporter = HardInterruptUsageReporter(hard_interrupt_usage, stdout.Print, MpstatOptions)
             reporter.print_report(timestamp[3])
-        if display_options.display_soft_interrupts():
+        if display_options.display_soft_interrupt_usage():
             soft_interrupt_usage = SoftInterruptUsage(interval_in_seconds, metric_repository, Soft_Interrupts_list)
             reporter = SoftInterruptUsageReporter(soft_interrupt_usage, stdout.Print, MpstatOptions)
             reporter.print_report(timestamp[3])
