@@ -355,6 +355,14 @@ class InterruptUsageReporter:
             values = (timestamp, cpu_interrupt.cpu_number) + tuple(map((lambda interrupt: interrupt.value()), cpu_interrupt.interrupts))
             self.printer(format_str % values)
 
+class NoneHandlingPrinterDecorator:
+    def __init__(self, printer):
+        self.printer = printer
+
+    def Print(self, args):
+        new_args = args.replace('None','?')
+        self.printer.Print(new_args)
+
 class MpstatOptions(pmapi.pmOptions):
     cpu_list = None
     cpu_filter = False
@@ -451,24 +459,25 @@ class MpstatReport(pmcc.MetricGroupPrinter):
         interval_in_seconds = self.timeStampDelta(group)
         metric_repository = MetricRepository(group)
         stdout = StdoutPrinter()
+        none_handler_printer = NoneHandlingPrinterDecorator(stdout.Print)
         display_options = DisplayOptions(MpstatOptions)
 
         if display_options.display_cpu_usage_summary():
             cpu_util = CpuUtil(interval_in_seconds, metric_repository)
             cpu_filter = CpuFilter(MpstatOptions)
-            reporter = CpuUtilReporter(cpu_util, cpu_filter, stdout.Print, MpstatOptions)
+            reporter = CpuUtilReporter(cpu_util, cpu_filter, none_handler_printer.Print, MpstatOptions)
             reporter.print_report(timestamp[3])
         if display_options.display_total_cpu_usage():
             total_interrupt_usage = TotalInterruptUsage(interval_in_seconds, metric_repository)
-            reporter = TotalInterruptUsageReporter(total_interrupt_usage, stdout.Print, MpstatOptions)
+            reporter = TotalInterruptUsageReporter(total_interrupt_usage, none_handler_printer.Print, MpstatOptions)
             reporter.print_report(timestamp[3])
         if display_options.display_hard_interrupt_usage():
             hard_interrupt_usage = HardInterruptUsage(interval_in_seconds, metric_repository, Interrupts_list)
-            reporter = InterruptUsageReporter(hard_interrupt_usage, stdout.Print, MpstatOptions)
+            reporter = InterruptUsageReporter(hard_interrupt_usage, none_handler_printer.Print, MpstatOptions)
             reporter.print_report(timestamp[3])
         if display_options.display_soft_interrupt_usage():
             soft_interrupt_usage = SoftInterruptUsage(interval_in_seconds, metric_repository, Soft_Interrupts_list)
-            reporter = InterruptUsageReporter(soft_interrupt_usage, stdout.Print, MpstatOptions)
+            reporter = InterruptUsageReporter(soft_interrupt_usage, none_handler_printer.Print, MpstatOptions)
             reporter.print_report(timestamp[3])
 
 
