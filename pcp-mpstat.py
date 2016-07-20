@@ -32,7 +32,7 @@ class NamedInterrupts:
             self.interrupt_list.reverse()
         return self.interrupt_list
 
-class ReportingMetricRepository:
+class MetricRepository:
     def __init__(self,group):
         self.group = group
         self.current_cached_values = {}
@@ -477,7 +477,7 @@ class MpstatReport(pmcc.MetricGroupPrinter):
 
         timestamp = group.contextCache.pmCtime(int(group.timestamp)).rstrip().split()
         interval_in_seconds = self.timeStampDelta(group)
-        metric_repository = ReportingMetricRepository(group)
+        metric_repository = MetricRepository(group)
         stdout = StdoutPrinter()
         display_options = DisplayOptions(MpstatOptions)
 

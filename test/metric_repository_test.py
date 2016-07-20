@@ -1,9 +1,9 @@
 import unittest
 from mock import Mock,MagicMock
 import mock
-from pcp_mpstat import ReportingMetricRepository
+from pcp_mpstat import MetricRepository
 
-class ReportingMetricRepositoryTest(unittest.TestCase):
+class MetricRepositoryTest(unittest.TestCase):
 
     def test_returns_the_current_value_for_a_metric_that_has_instances(self):
         utime_mock = Mock(
@@ -11,7 +11,7 @@ class ReportingMetricRepositoryTest(unittest.TestCase):
             netPrevValues = [(Mock(inst=111),'dummyprocess',12354)]
         )
         group = {'kernel.percpu.cpu.user':utime_mock}
-        m_repo = ReportingMetricRepository(group)
+        m_repo = MetricRepository(group)
 
         c_utime = m_repo.current_value('kernel.percpu.cpu.user',111)
 
@@ -23,7 +23,7 @@ class ReportingMetricRepositoryTest(unittest.TestCase):
             netPrevValues = [('NULL',None,12354)]
         )
         group = {'kernel.all.cpu.user':utime_mock}
-        m_repo = ReportingMetricRepository(group)
+        m_repo = MetricRepository(group)
 
         c_utime = m_repo.current_value('kernel.all.cpu.user',None)
 
@@ -35,7 +35,7 @@ class ReportingMetricRepositoryTest(unittest.TestCase):
             netPrevValues = [(Mock(inst=111),'dummyprocess',12354)]
         )
         group = {'kernel.percpu.cpu.user':utime_mock}
-        m_repo = ReportingMetricRepository(group)
+        m_repo = MetricRepository(group)
 
         c_utime = m_repo.current_value('kernel.percpu.cpu.vuser',111)
 
@@ -47,7 +47,7 @@ class ReportingMetricRepositoryTest(unittest.TestCase):
             netPrevValues = [('NULL',None,12354)]
         )
         group = {'kernel.all.cpu.user':utime_mock}
-        m_repo = ReportingMetricRepository(group)
+        m_repo = MetricRepository(group)
 
         c_utime = m_repo.current_value('kernel.all.cpu.guest',None)
 
@@ -59,7 +59,7 @@ class ReportingMetricRepositoryTest(unittest.TestCase):
             netPrevValues = [(Mock(inst=111),'dummyprocess',12354)]
         )
         group = {'kernel.percpu.cpu.user':utime_mock}
-        m_repo = ReportingMetricRepository(group)
+        m_repo = MetricRepository(group)
 
         c_utime = m_repo.previous_value('kernel.percpu.cpu.user',111)
 
@@ -71,7 +71,7 @@ class ReportingMetricRepositoryTest(unittest.TestCase):
             netPrevValues = [('NULL',None,12354)]
         )
         group = {'kernel.all.cpu.user':utime_mock}
-        m_repo = ReportingMetricRepository(group)
+        m_repo = MetricRepository(group)
 
         c_utime = m_repo.previous_value('kernel.all.cpu.user',None)
 
@@ -83,7 +83,7 @@ class ReportingMetricRepositoryTest(unittest.TestCase):
             netPrevValues = [(Mock(inst=111),'dummyprocess',12354)]
         )
         group = {'kernel.percpu.cpu.user':utime_mock}
-        m_repo = ReportingMetricRepository(group)
+        m_repo = MetricRepository(group)
 
         c_utime = m_repo.previous_value('kernel.percpu.cpu.vuser',111)
 
@@ -95,7 +95,7 @@ class ReportingMetricRepositoryTest(unittest.TestCase):
             netPrevValues = [('NULL',None,12354)]
         )
         group = {'kernel.all.cpu.user':utime_mock}
-        m_repo = ReportingMetricRepository(group)
+        m_repo = MetricRepository(group)
 
         c_utime = m_repo.previous_value('kernel.all.cpu.guest',None)
 
@@ -107,10 +107,10 @@ class ReportingMetricRepositoryTest(unittest.TestCase):
             netPrevValues = [(Mock(inst=111),'dummyprocess',12354)]
         )
         group = {'kernel.percpu.cpu.user':proc_utime_mock}
-        m_repo = ReportingMetricRepository(group)
+        m_repo = MetricRepository(group)
         fetch_call_count = 0
 
-        with mock.patch.object(m_repo,'_ReportingMetricRepository__fetch_current_values',return_value={111:12345}) as method:
+        with mock.patch.object(m_repo,'_MetricRepository__fetch_current_values',return_value={111:12345}) as method:
             c_ptime = m_repo.current_value('kernel.percpu.cpu.user',111)
             fetch_call_count = method.call_count
 
@@ -122,11 +122,11 @@ class ReportingMetricRepositoryTest(unittest.TestCase):
             netPrevValues = [(Mock(inst=111),'dummyprocess',12354)]
         )
         group = {'kernel.percpu.cpu.user':proc_utime_mock}
-        m_repo = ReportingMetricRepository(group)
+        m_repo = MetricRepository(group)
         m_repo.current_cached_values = {'kernel.percpu.cpu.user':{111:12354}}
         fetch_call_count = 0
 
-        with mock.patch.object(m_repo,'_ReportingMetricRepository__fetch_current_values',return_value={111:12345}) as method:
+        with mock.patch.object(m_repo,'_MetricRepository__fetch_current_values',return_value={111:12345}) as method:
             c_ptime = m_repo.current_value('kernel.percpu.cpu.user',111)
             fetch_call_count = method.call_count
 
