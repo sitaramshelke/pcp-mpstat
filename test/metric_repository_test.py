@@ -108,7 +108,6 @@ class MetricRepositoryTest(unittest.TestCase):
         )
         group = {'kernel.percpu.cpu.user':proc_utime_mock}
         m_repo = MetricRepository(group)
-        fetch_call_count = 0
 
         with mock.patch.object(m_repo,'_MetricRepository__fetch_current_values',return_value={111:12345}) as method:
             c_ptime = m_repo.current_value('kernel.percpu.cpu.user',111)
@@ -124,7 +123,6 @@ class MetricRepositoryTest(unittest.TestCase):
         group = {'kernel.percpu.cpu.user':proc_utime_mock}
         m_repo = MetricRepository(group)
         m_repo.current_cached_values = {'kernel.percpu.cpu.user':{111:12354}}
-        fetch_call_count = 0
 
         with mock.patch.object(m_repo,'_MetricRepository__fetch_current_values',return_value={111:12345}) as method:
             c_ptime = m_repo.current_value('kernel.percpu.cpu.user',111)
