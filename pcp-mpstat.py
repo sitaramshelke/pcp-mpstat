@@ -431,28 +431,17 @@ class DisplayOptions:
         self.mpstatoptions = mpstatoptions
 
     def display_cpu_usage_summary(self):
-        if self.mpstatoptions.no_options == True or self.mpstatoptions.cpu_filter == True:
-            return True
-        else:
-            return False
+        return self.mpstatoptions.no_options or self.mpstatoptions.cpu_filter
 
     def display_total_cpu_usage(self):
-        if self.mpstatoptions.interrupts_filter == True and (self.mpstatoptions.interrupt_type == "SUM" or self.mpstatoptions.interrupt_type == "ALL"):
-            return True
-        else:
-            return False
+        return self.mpstatoptions.interrupts_filter and (self.mpstatoptions.interrupt_type == "SUM" or self.mpstatoptions.interrupt_type == "ALL")
 
     def display_hard_interrupt_usage(self):
-        if self.mpstatoptions.interrupts_filter == True and (self.mpstatoptions.interrupt_type == "CPU" or self.mpstatoptions.interrupt_type == "ALL"):
-            return True
-        else:
-            return False
+        return self.mpstatoptions.interrupts_filter and (self.mpstatoptions.interrupt_type == "CPU" or self.mpstatoptions.interrupt_type == "ALL")
 
     def display_soft_interrupt_usage(self):
-        if self.mpstatoptions.interrupts_filter == True and (self.mpstatoptions.interrupt_type == "SCPU" or self.mpstatoptions.interrupt_type == "ALL"):
-            return True
-        else:
-            return False
+        return self.mpstatoptions.interrupts_filter and (self.mpstatoptions.interrupt_type == "SCPU" or self.mpstatoptions.interrupt_type == "ALL")
+        
 class MpstatReport(pmcc.MetricGroupPrinter):
     Machine_info_count = 0
 
