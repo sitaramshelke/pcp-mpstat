@@ -285,22 +285,22 @@ class SoftInterruptUsage:
 
 
 class CpuFilter:
-    def __init__(self, options):
-        self.options = options
+    def __init__(self, mpstat_options):
+        self.mpstat_options = mpstat_options
 
     def filter_cpus(self, cpus):
         return filter(lambda c: self.__matches_cpu(c), cpus)
 
     def __matches_cpu(self, cpu):
-        if self.options.cpu_list == 'ALL':
+        if self.mpstat_options.cpu_list == 'ALL':
             return True
-        elif self.options.cpu_list == 'ON':
+        elif self.mpstat_options.cpu_list == 'ON':
             if cpu.cpu_online() == 1:
                 return True
             else:
                 return False
-        elif self.options.cpu_list is not None:
-            if cpu.cpu_number() in self.options.cpu_list:
+        elif self.mpstat_options.cpu_list is not None:
+            if cpu.cpu_number() in self.mpstat_options.cpu_list:
                 return True
             else:
                 return False
@@ -361,7 +361,7 @@ class NoneHandlingPrinterDecorator:
 
     def Print(self, args):
         new_args = args.replace('None','?')
-        self.printer.Print(new_args)
+        self.printer(new_args)
 
 class MpstatOptions(pmapi.pmOptions):
     cpu_list = None
