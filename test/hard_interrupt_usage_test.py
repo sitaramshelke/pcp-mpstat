@@ -14,7 +14,6 @@ class TestHardInterruptUsage(unittest.TestCase):
         return None
 
     def test_get_percpu_interrupts(self):
-        Interrupt_usage = Mock()
         hard_interrupt_usage = HardInterruptUsage(1.34, self.metric_repository, self.interrupt_metric)
 
         percpu_interrupts = hard_interrupt_usage.get_percpu_interrupts()

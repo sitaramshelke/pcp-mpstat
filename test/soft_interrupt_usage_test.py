@@ -14,7 +14,6 @@ class TestSoftInterruptUsage(unittest.TestCase):
         return None
 
     def test_get_percpu_interrupts(self):
-        Interrupt_usage = Mock()
         soft_interrupt_usage = SoftInterruptUsage(1.34, self.metric_repository, self.interrupt_metric)
 
         percpu_interrupts = soft_interrupt_usage.get_percpu_interrupts()
