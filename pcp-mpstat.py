@@ -334,14 +334,14 @@ class TotalInterruptUsageReporter:
         self.printer("%10s\t%5s\t%5s"%("Timestamp","CPU","intr/s"))
         self.printer("%10s\t%5s\t%5s"%(timestamp,'all',self.total_interrupt_usage.total_interrupt_per_delta_time()))
 
-class HardInterruptUsageReporter:
-    def __init__(self, hard_interrupt_usage, printer, mpstat_options):
-        self.hard_interrupt_usage = hard_interrupt_usage
+class InterruptUsageReporter:
+    def __init__(self, interrupt_usage, printer, mpstat_options):
+        self.interrupt_usage = interrupt_usage
         self.printer = printer
         self. mpstat_options = mpstat_options
 
     def print_report(self, timestamp):
-        cpu_interrupts = self.hard_interrupt_usage.get_percpu_interrupts()
+        cpu_interrupts = self.interrupt_usage.get_percpu_interrupts()
         header_values = ("Timestamp","cpu")
         format_str = "%10s\t%4s\t"
 
@@ -354,27 +354,6 @@ class HardInterruptUsageReporter:
         for cpu_interrupt in cpu_interrupts:
             values = (timestamp, cpu_interrupt.cpu_number) + tuple(map((lambda interrupt: interrupt.value()), cpu_interrupt.interrupts))
             self.printer(format_str % values)
-
-class SoftInterruptUsageReporter:
-    def __init__(self, soft_interrupt_usage, printer, mpstat_options):
-        self.soft_interrupt_usage = soft_interrupt_usage
-        self.printer = printer
-        self. mpstat_options = mpstat_options
-
-    def print_report(self, timestamp):
-        cpu_interrupts = self.soft_interrupt_usage.get_percpu_interrupts()
-        header_values = ("Timestamp","cpu")
-        format_str = "%10s\t%4s\t"
-         # use the first CPU in cpu_interrupts to get the interrupt names
-        for interrupt in cpu_interrupts[0].interrupts:
-            format_str += "%"+str(len(interrupt.name())+2)+"s\t"
-            header_values += (interrupt.name() + "/s",)
-        self.printer(format_str % header_values)
-
-        for cpu_interrupt in cpu_interrupts:
-            values = (timestamp, cpu_interrupt.cpu_number) + tuple(map((lambda interrupt: interrupt.value()), cpu_interrupt.interrupts))
-            self.printer(format_str % values)
-
 
 class MpstatOptions(pmapi.pmOptions):
     cpu_list = None
@@ -441,7 +420,7 @@ class DisplayOptions:
 
     def display_soft_interrupt_usage(self):
         return self.mpstatoptions.interrupts_filter and (self.mpstatoptions.interrupt_type == "SCPU" or self.mpstatoptions.interrupt_type == "ALL")
-        
+
 class MpstatReport(pmcc.MetricGroupPrinter):
     Machine_info_count = 0
 
@@ -482,11 +461,11 @@ class MpstatReport(pmcc.MetricGroupPrinter):
             reporter.print_report(timestamp[3])
         if display_options.display_hard_interrupt_usage():
             hard_interrupt_usage = HardInterruptUsage(interval_in_seconds, metric_repository, Interrupts_list)
-            reporter = HardInterruptUsageReporter(hard_interrupt_usage, stdout.Print, MpstatOptions)
+            reporter = InterruptUsageReporter(hard_interrupt_usage, stdout.Print, MpstatOptions)
             reporter.print_report(timestamp[3])
         if display_options.display_soft_interrupt_usage():
             soft_interrupt_usage = SoftInterruptUsage(interval_in_seconds, metric_repository, Soft_Interrupts_list)
-            reporter = SoftInterruptUsageReporter(soft_interrupt_usage, stdout.Print, MpstatOptions)
+            reporter = InterruptUsageReporter(soft_interrupt_usage, stdout.Print, MpstatOptions)
             reporter.print_report(timestamp[3])
 
 
