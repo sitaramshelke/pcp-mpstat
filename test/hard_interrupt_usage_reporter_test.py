@@ -5,16 +5,16 @@ from pcp_mpstat import HardInterruptUsageReporter
 
 class TestHardInterruptUsageReporter(unittest.TestCase):
     def setUp(self):
-        self.interrupts = [ Mock(), Mock()]
-        self.interrupts[0].configure_mock(
+        interrupts = [ Mock(), Mock()]
+        interrupts[0].configure_mock(
                             name = Mock(return_value = 'SOME_INTERRUPT'),
                             value = Mock(return_value = 1.23))
-        self.interrupts[1].configure_mock(
+        interrupts[1].configure_mock(
                             name = Mock(return_value = 'ANOTHER_INTERRUPT'),
                             value = Mock(return_value = 2.34))
         self.cpu_interrupt_zero = Mock(
                                 cpu_number = 0,
-                                interrupts = self.interrupts
+                                interrupts = interrupts
                                 )
     def test_print_report(self):
         hard_interrupt_usage = Mock()

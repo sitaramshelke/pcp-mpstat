@@ -18,6 +18,7 @@ class TestCpuUtil(unittest.TestCase):
         cpu_list = cpu_util.get_percpu_util()
 
         self.assertEquals(len(cpu_list),2)
+
     def test_get_totalcpu_util(self):
         metric_repository = mock.Mock()
         cpu_util = CpuUtil(1.34, metric_repository)

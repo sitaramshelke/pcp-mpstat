@@ -175,6 +175,7 @@ class CoreCpuUtil:
             return float("%.2f"%((100*(c_time - p_time))/(1000*self.delta_time)))
         else:
             return None
+
     def guest_nice(self):
         metric = 'kernel.' + self.__all_or_percpu() + '.cpu.guest_nice'
         p_time = self.metric_repository.previous_value(metric, self.instance)
@@ -192,7 +193,7 @@ class CoreCpuUtil:
             return float("%.2f"%((100*(c_time - p_time))/(1000*self.delta_time)))
         else:
             return None
-    
+
     def __all_or_percpu(self):
         return 'all' if self.instance is None else 'percpu'
 
@@ -200,7 +201,7 @@ class CpuUtil:
     def __init__(self, delta_time, metric_repository):
         self.__metric_repository = metric_repository
         self.delta_time = delta_time
-    
+
     def get_totalcpu_util(self):
         return CoreCpuUtil(None, self.delta_time, self.__metric_repository)
 
@@ -215,7 +216,7 @@ class TotalInterruptUsage:
     def __init__(self, delta_time, metric_repository):
         self.delta_time = delta_time
         self.__metric_repository = metric_repository
-    
+
     def total_interrupt_per_delta_time(self):
         c_value = self.__metric_repository.current_value('kernel.all.intr', None)
         p_value = self.__metric_repository.previous_value('kernel.all.intr', None)
@@ -255,14 +256,14 @@ class HardInterruptUsage:
         self.delta_time = delta_time
         self.metric_repository = metric_repository
         self.interrupt_metrics = interrupt_metrics
-    
+
     def get_percpu_interrupts(self):
         return map((lambda cpuid: CpuInterrupts(cpuid, self.__get_all_interrupts_for_cpu(cpuid))), self.__cpus())
 
     def __cpus(self):
         cpu_dict = self.metric_repository.current_values('hinv.map.cpu_num')
         return sorted(cpu_dict.values())
-    
+
     def __get_all_interrupts_for_cpu(self, cpuid):
         return map((lambda metric: InterruptUsage(self.delta_time, self.metric_repository, metric, cpuid)), self.interrupt_metrics)
 
@@ -278,7 +279,7 @@ class SoftInterruptUsage:
     def __cpus(self):
         cpu_dict = self.metric_repository.current_values('hinv.map.cpu_num')
         return sorted(cpu_dict.values())
-    
+
     def __get_all_interrupts_for_cpu(self, cpuid):
         return map((lambda metric: InterruptUsage(self.delta_time, self.metric_repository, metric, cpuid)), self.interrupt_metrics)
 
@@ -286,10 +287,10 @@ class SoftInterruptUsage:
 class CpuFilter:
     def __init__(self, options):
         self.options = options
-    
+
     def filter_cpus(self, cpus):
         return filter(lambda c: self.__matches_cpu(c), cpus)
-    
+
     def __matches_cpu(self, cpu):
         if self.options.cpu_list == 'ALL':
             return True
@@ -312,7 +313,7 @@ class CpuUtilReporter:
         self.cpu_filter = cpu_filter
         self.printer = printer
         self.mpstat_options = mpstat_options
-    
+
     def print_report(self, timestamp):
         self.printer("%10s\t%3s\t%5s\t%6s\t%5s\t%8s\t%5s\t%6s\t%7s\t%7s\t%6s\t%6s"%("Timestamp","CPU","usr/s","nice/s","sys/s","iowait/s","irq/s","soft/s","steal/s","guest/s","nice/s","idle/s"))
         if self.mpstat_options.cpu_list == "ALL" or self.mpstat_options.cpu_list is None:
@@ -328,7 +329,7 @@ class TotalInterruptUsageReporter:
         self.total_interrupt_usage = total_interrupt_usage
         self.printer = printer
         self.mpstat_options = mpstat_options
-    
+
     def print_report(self, timestamp):
         self.printer("%10s\t%5s\t%5s"%("Timestamp","CPU","intr/s"))
         self.printer("%10s\t%5s\t%5s"%(timestamp,'all',self.total_interrupt_usage.total_interrupt_per_delta_time()))
@@ -338,7 +339,7 @@ class HardInterruptUsageReporter:
         self.hard_interrupt_usage = hard_interrupt_usage
         self.printer = printer
         self. mpstat_options = mpstat_options
-    
+
     def print_report(self, timestamp):
         cpu_interrupts = self.hard_interrupt_usage.get_percpu_interrupts()
         header_values = ("Timestamp","cpu")
@@ -359,7 +360,7 @@ class SoftInterruptUsageReporter:
         self.soft_interrupt_usage = soft_interrupt_usage
         self.printer = printer
         self. mpstat_options = mpstat_options
-    
+
     def print_report(self, timestamp):
         cpu_interrupts = self.soft_interrupt_usage.get_percpu_interrupts()
         header_values = ("Timestamp","cpu")
@@ -373,7 +374,7 @@ class SoftInterruptUsageReporter:
         for cpu_interrupt in cpu_interrupts:
             values = (timestamp, cpu_interrupt.cpu_number) + tuple(map((lambda interrupt: interrupt.value()), cpu_interrupt.interrupts))
             self.printer(format_str % values)
-            
+
 
 class MpstatOptions(pmapi.pmOptions):
     cpu_list = None
@@ -404,7 +405,7 @@ class MpstatOptions(pmapi.pmOptions):
                 except ValueError as e:
                     print ("Invalid CPU List: use comma separated cpu nos without whitespaces")
                     sys.exit(1)
-    
+
     def override(self, opt):
         """ Override standard PCP options to match mpstat(1) """
         if (opt == 'A'):
@@ -498,7 +499,7 @@ class MpstatReport(pmcc.MetricGroupPrinter):
             soft_interrupt_usage = SoftInterruptUsage(interval_in_seconds, metric_repository, Soft_Interrupts_list)
             reporter = SoftInterruptUsageReporter(soft_interrupt_usage, stdout.Print, MpstatOptions)
             reporter.print_report(timestamp[3])
-        
+
 
 
 
@@ -509,7 +510,7 @@ if __name__ == '__main__':
     Soft_Interrupts_list = Soft_Interrupts.get_all_named_interrupt_metrics()
     MPSTAT_METRICS += Interrupts_list
     MPSTAT_METRICS += Soft_Interrupts_list
-    
+
     try:
         opts = MpstatOptions()
         manager = pmcc.MetricGroupManager.builder(opts,sys.argv)

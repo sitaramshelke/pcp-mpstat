@@ -269,7 +269,6 @@ class TestCoreCpuUtil(unittest.TestCase):
 
         self.assertIsNone(sys_time)
 
-
     def test_iowait_time_if_current_value_is_none(self):
         cpu_util = CoreCpuUtil(2, 1.34, self.__metric_repository)
 
@@ -332,7 +331,6 @@ class TestCoreCpuUtil(unittest.TestCase):
         sys_time  = cpu_util.sys_time()
 
         self.assertIsNone(sys_time)
-
 
     def test_iowait_time_if_previous_value_is_none(self):
         cpu_util = CoreCpuUtil(1, 1.34, self.__metric_repository)

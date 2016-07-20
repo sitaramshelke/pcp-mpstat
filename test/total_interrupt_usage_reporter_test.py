@@ -16,6 +16,5 @@ class TestTotalInterruptUsageReporter(unittest.TestCase):
 
         printer.assert_called_with('2016-19-07 IST\t  all\t 1.23')
 
-
 if __name__ == "__main__":
-    unittest.main()     
+    unittest.main()

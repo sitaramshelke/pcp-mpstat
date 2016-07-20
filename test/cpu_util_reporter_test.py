@@ -15,7 +15,7 @@ class TestCpuUtilReporter(unittest.TestCase):
                             steal = Mock(return_value = 7.89),
                             guest_time = Mock(return_value = 8.90),
                             guest_nice = Mock(return_value = 1.34),
-                            idle_time = Mock(return_value = 2.45)                                   
+                            idle_time = Mock(return_value = 2.45)
                         )
         self.cpu_usage_1 = Mock(
                             cpu_number = Mock(return_value = 1),
@@ -28,7 +28,7 @@ class TestCpuUtilReporter(unittest.TestCase):
                             steal = Mock(return_value = 2.59),
                             guest_time = Mock(return_value = 5.60),
                             guest_nice = Mock(return_value = 2.34),
-                            idle_time = Mock(return_value = 6.67)                                   
+                            idle_time = Mock(return_value = 6.67)
                         )
         self.cpu_usage_2 = Mock(
                             cpu_number = Mock(return_value = 2),
@@ -41,9 +41,8 @@ class TestCpuUtilReporter(unittest.TestCase):
                             steal = Mock(return_value = 6.59),
                             guest_time = Mock(return_value = 2.60),
                             guest_nice = Mock(return_value = 7.34),
-                            idle_time = Mock(return_value = 3.67)                                   
+                            idle_time = Mock(return_value = 3.67)
                         )
-
 
     def test_print_report_with_no_options(self):
         options = Mock()
@@ -55,8 +54,8 @@ class TestCpuUtilReporter(unittest.TestCase):
         printer = Mock()
         report = CpuUtilReporter(cpu_util, cpu_filter, printer, options)
         timestamp = '2016-7-18 IST'
-        
-        report.print_report(timestamp);
+
+        report.print_report(timestamp)
 
         printer.assert_called_with('2016-7-18 IST\tALL\t 1.23\t  2.34\t 3.45\t    4.56\t 5.67\t  6.78\t   7.89\t    8.9\t  1.34\t  2.45')
 
@@ -95,7 +94,7 @@ class TestCpuUtilReporter(unittest.TestCase):
                  call('2016-7-18 IST\tALL\t 1.23\t  2.34\t 3.45\t    4.56\t 5.67\t  6.78\t   7.89\t    8.9\t  1.34\t  2.45'),
                  call('2016-7-18 IST\t  1\t 1.43\t  2.35\t 2.45\t    3.76\t 6.45\t  2.58\t   2.59\t    5.6\t  2.34\t  6.67'),
                  call('2016-7-18 IST\t  2\t 2.43\t  3.35\t 5.45\t    2.76\t 7.45\t  3.58\t   6.59\t    2.6\t  7.34\t  3.67')]
-        
+
         printer.assert_has_calls(calls)
 
 if __name__ == "__main__":

@@ -20,6 +20,7 @@ class TestDisplayOptions(unittest.TestCase):
     def test_display_total_cpu_usage_with_type_sum(self):
         self.mpstat_options.interrupts_filter = True
         self.mpstat_options.interrupt_type = "SUM"
+
         display_options = DisplayOptions(self.mpstat_options)
 
         self.assertTrue(display_options.display_total_cpu_usage())
@@ -27,6 +28,7 @@ class TestDisplayOptions(unittest.TestCase):
     def test_display_total_cpu_usage_with_type_all(self):
         self.mpstat_options.interrupts_filter = True
         self.mpstat_options.interrupt_type = "ALL"
+
         display_options = DisplayOptions(self.mpstat_options)
 
         self.assertTrue(display_options.display_total_cpu_usage())
@@ -34,6 +36,7 @@ class TestDisplayOptions(unittest.TestCase):
     def test_display_hard_interrupt_usage_with_type_cpu(self):
         self.mpstat_options.interrupts_filter = True
         self.mpstat_options.interrupt_type = "CPU"
+
         display_options = DisplayOptions(self.mpstat_options)
 
         self.assertTrue(display_options.display_hard_interrupt_usage())
@@ -41,6 +44,7 @@ class TestDisplayOptions(unittest.TestCase):
     def test_display_hard_interrupt_usage_with_type_all(self):
         self.mpstat_options.interrupts_filter = True
         self.mpstat_options.interrupt_type = "ALL"
+
         display_options = DisplayOptions(self.mpstat_options)
 
         self.assertTrue(display_options.display_hard_interrupt_usage())
@@ -48,6 +52,7 @@ class TestDisplayOptions(unittest.TestCase):
     def test_display_soft_interrupt_usage_with_type_scpu(self):
         self.mpstat_options.interrupts_filter = True
         self.mpstat_options.interrupt_type = "SCPU"
+
         display_options = DisplayOptions(self.mpstat_options)
 
         self.assertTrue(display_options.display_soft_interrupt_usage())
@@ -55,12 +60,10 @@ class TestDisplayOptions(unittest.TestCase):
     def test_display_soft_interrupt_usage_with_type_all(self):
         self.mpstat_options.interrupts_filter = True
         self.mpstat_options.interrupt_type = "ALL"
+
         display_options = DisplayOptions(self.mpstat_options)
 
         self.assertTrue(display_options.display_soft_interrupt_usage())
 
-
-
-
 if __name__ == '__main__':
-    unittest.main()     
+    unittest.main()
