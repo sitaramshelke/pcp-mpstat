@@ -365,7 +365,9 @@ class MpstatOptions(pmapi.pmOptions):
 
     def extraOptions(self, opt,optarg, index):
         MpstatOptions.no_options = False
-        if opt == 'A':
+        if opt == 'u':
+            MpstatOptions.no_options = True
+        elif opt == 'A':
             MpstatOptions.interrupts_filter = True
             MpstatOptions.interrupt_type = 'ALL'
             MpstatOptions.cpu_filter = True
@@ -392,7 +394,7 @@ class MpstatOptions(pmapi.pmOptions):
         return 0
 
     def __init__(self):
-        pmapi.pmOptions.__init__(self,"a:s:t:AP:I:V?")
+        pmapi.pmOptions.__init__(self,"a:s:t:uAP:I:V?")
         self.pmSetOptionCallback(self.extraOptions)
         self.pmSetOverrideCallback(self.override)
         self.pmSetLongOptionHeader("General options")
@@ -401,6 +403,7 @@ class MpstatOptions(pmapi.pmOptions):
         self.pmSetLongOptionInterval()
         self.pmSetLongOptionVersion()
         self.pmSetLongOptionHelp()
+        self.pmSetLongOption("",0,"u","","Similar to no options")
         self.pmSetLongOption("",0,"A","","Similar to -P ALL -I ALL")
         self.pmSetLongOption("",1,"P","[1,3..|ON|ALL]","Filter or Show All/Online CPUs")
         self.pmSetLongOption("",1,"I","[SUM|CPU|SCPU|ALL]","Report Interrupt statistics")
