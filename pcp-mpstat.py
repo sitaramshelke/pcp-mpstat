@@ -248,8 +248,10 @@ class InterruptUsage:
 
 class CpuInterrupts:
     def __init__(self, cpu_number, interrupts):
-        self.cpu_number = cpu_number
+        self.cpu_num = cpu_number
         self.interrupts = interrupts
+    def cpu_number(self):
+        return self.cpu_num
 
 class HardInterruptUsage:
     def __init__(self, delta_time, metric_repository, interrupt_metrics):
@@ -335,8 +337,9 @@ class TotalInterruptUsageReporter:
         self.printer("%10s\t%5s\t%5s"%(timestamp,'all',self.total_interrupt_usage.total_interrupt_per_delta_time()))
 
 class InterruptUsageReporter:
-    def __init__(self, interrupt_usage, printer, mpstat_options):
+    def __init__(self, interrupt_usage, cpu_filter, printer, mpstat_options):
         self.interrupt_usage = interrupt_usage
+        self.cpu_filter = cpu_filter
         self.printer = printer
         self. mpstat_options = mpstat_options
 
@@ -351,8 +354,9 @@ class InterruptUsageReporter:
             header_values += (interrupt.name() + "/s",)
         self.printer(format_str % header_values)
 
-        for cpu_interrupt in cpu_interrupts:
-            values = (timestamp, cpu_interrupt.cpu_number) + tuple(map((lambda interrupt: interrupt.value()), cpu_interrupt.interrupts))
+        cpu_interrupts_list = self.cpu_filter.filter_cpus(cpu_interrupts)
+        for cpu_interrupt in cpu_interrupts_list:
+            values = (timestamp, cpu_interrupt.cpu_number()) + tuple(map((lambda interrupt: interrupt.value()), cpu_interrupt.interrupts))
             self.printer(format_str % values)
 
 class NoneHandlingPrinterDecorator:
@@ -421,7 +425,7 @@ class DisplayOptions:
         self.mpstatoptions = mpstatoptions
 
     def display_cpu_usage_summary(self):
-        return self.mpstatoptions.no_options or self.mpstatoptions.cpu_filter
+        return self.mpstatoptions.no_options or (self.mpstatoptions.cpu_filter and not self.mpstatoptions.interrupts_filter)
 
     def display_total_cpu_usage(self):
         return self.mpstatoptions.interrupts_filter and (self.mpstatoptions.interrupt_type == "SUM" or self.mpstatoptions.interrupt_type == "ALL")
@@ -473,11 +477,13 @@ class MpstatReport(pmcc.MetricGroupPrinter):
             reporter.print_report(timestamp[3])
         if display_options.display_hard_interrupt_usage():
             hard_interrupt_usage = HardInterruptUsage(interval_in_seconds, metric_repository, Interrupts_list)
-            reporter = InterruptUsageReporter(hard_interrupt_usage, none_handler_printer.Print, MpstatOptions)
+            cpu_filter = CpuFilter(MpstatOptions)
+            reporter = InterruptUsageReporter(hard_interrupt_usage, cpu_filter, none_handler_printer.Print, MpstatOptions)
             reporter.print_report(timestamp[3])
         if display_options.display_soft_interrupt_usage():
             soft_interrupt_usage = SoftInterruptUsage(interval_in_seconds, metric_repository, Soft_Interrupts_list)
-            reporter = InterruptUsageReporter(soft_interrupt_usage, none_handler_printer.Print, MpstatOptions)
+            cpu_filter = CpuFilter(MpstatOptions)
+            reporter = InterruptUsageReporter(soft_interrupt_usage, cpu_filter, none_handler_printer.Print, MpstatOptions)
             reporter.print_report(timestamp[3])
 
 
