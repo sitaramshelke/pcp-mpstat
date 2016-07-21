@@ -71,7 +71,7 @@ class TestCpuUtilReporter(unittest.TestCase):
 
         report.print_report(timestamp)
 
-        calls = [call(' Timestamp\tCPU\tusr/s\tnice/s\tsys/s\tiowait/s\tirq/s\tsoft/s\tsteal/s\tguest/s\tnice/s\tidle/s'),
+        calls = [call(' Timestamp\tCPU\t %usr\t %nice\t %sys\t %iowait\t %irq\t %soft\t %steal\t %guest\t %nice\t %idle'),
                  call('2016-7-18 IST\t  1\t 1.43\t  2.35\t 2.45\t    3.76\t 6.45\t  2.58\t   2.59\t    5.6\t  2.34\t  6.67'),
                  call('2016-7-18 IST\t  2\t 2.43\t  3.35\t 5.45\t    2.76\t 7.45\t  3.58\t   6.59\t    2.6\t  7.34\t  3.67')]
 
@@ -90,7 +90,7 @@ class TestCpuUtilReporter(unittest.TestCase):
 
         report.print_report(timestamp)
 
-        calls = [call(' Timestamp\tCPU\tusr/s\tnice/s\tsys/s\tiowait/s\tirq/s\tsoft/s\tsteal/s\tguest/s\tnice/s\tidle/s'),
+        calls = [call(' Timestamp\tCPU\t %usr\t %nice\t %sys\t %iowait\t %irq\t %soft\t %steal\t %guest\t %nice\t %idle'),
                  call('2016-7-18 IST\tALL\t 1.23\t  2.34\t 3.45\t    4.56\t 5.67\t  6.78\t   7.89\t    8.9\t  1.34\t  2.45'),
                  call('2016-7-18 IST\t  1\t 1.43\t  2.35\t 2.45\t    3.76\t 6.45\t  2.58\t   2.59\t    5.6\t  2.34\t  6.67'),
                  call('2016-7-18 IST\t  2\t 2.43\t  3.35\t 5.45\t    2.76\t 7.45\t  3.58\t   6.59\t    2.6\t  7.34\t  3.67')]
