@@ -247,11 +247,14 @@ class InterruptUsage:
             return None
 
 class CpuInterrupts:
-    def __init__(self, cpu_number, interrupts):
+    def __init__(self, metric_repository, cpu_number, interrupts):
+        self.metric_repository = metric_repository
         self.cpu_num = cpu_number
         self.interrupts = interrupts
     def cpu_number(self):
         return self.cpu_num
+    def cpu_online(self):
+        return self.metric_repository.current_value('hinv.cpu.online', self.cpu_num)
 
 class HardInterruptUsage:
     def __init__(self, delta_time, metric_repository, interrupt_metrics):
@@ -260,7 +263,7 @@ class HardInterruptUsage:
         self.interrupt_metrics = interrupt_metrics
 
     def get_percpu_interrupts(self):
-        return map((lambda cpuid: CpuInterrupts(cpuid, self.__get_all_interrupts_for_cpu(cpuid))), self.__cpus())
+        return map((lambda cpuid: CpuInterrupts(self.metric_repository, cpuid, self.__get_all_interrupts_for_cpu(cpuid))), self.__cpus())
 
     def __cpus(self):
         cpu_dict = self.metric_repository.current_values('hinv.map.cpu_num')
@@ -276,7 +279,7 @@ class SoftInterruptUsage:
         self.interrupt_metrics = interrupt_metrics
 
     def get_percpu_interrupts(self):
-        return map((lambda cpuid: CpuInterrupts(cpuid, self.__get_all_interrupts_for_cpu(cpuid))), self.__cpus())
+        return map((lambda cpuid: CpuInterrupts(self.metric_repository, cpuid, self.__get_all_interrupts_for_cpu(cpuid))), self.__cpus())
 
     def __cpus(self):
         cpu_dict = self.metric_repository.current_values('hinv.map.cpu_num')
