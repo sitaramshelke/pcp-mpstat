@@ -315,7 +315,7 @@ class CpuUtilReporter:
         self.mpstat_options = mpstat_options
 
     def print_report(self, timestamp):
-        self.printer("%10s\t%3s\t%5s\t%6s\t%5s\t%8s\t%5s\t%6s\t%7s\t%7s\t%6s\t%6s"%("Timestamp","CPU","usr/s","nice/s","sys/s","iowait/s","irq/s","soft/s","steal/s","guest/s","nice/s","idle/s"))
+        self.printer("%10s\t%3s\t%5s\t%6s\t%5s\t%8s\t%5s\t%6s\t%7s\t%7s\t%6s\t%6s"%("Timestamp","CPU","%usr","%nice","%sys","%iowait","%irq","%soft","%steal","%guest","%nice","%idle"))
         if self.mpstat_options.cpu_list == "ALL" or self.mpstat_options.cpu_list is None:
             cpu_util = self.cpu_util.get_totalcpu_util()
             self.printer("%10s\t%3s\t%5s\t%6s\t%5s\t%8s\t%5s\t%6s\t%7s\t%7s\t%6s\t%6s"%(timestamp,"ALL", cpu_util.user_time(), cpu_util.nice_time(), cpu_util.sys_time(), cpu_util.iowait_time(), cpu_util.irq_hard(), cpu_util.irq_soft(), cpu_util.steal(), cpu_util.guest_time(), cpu_util.guest_nice(), cpu_util.idle_time()))
