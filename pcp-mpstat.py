@@ -313,19 +313,18 @@ class CpuFilter:
             return False
 
 class CpuUtilReporter:
-    def __init__(self, cpu_util, cpu_filter, printer, mpstat_options):
-        self.cpu_util = cpu_util
+    def __init__(self, cpu_filter, printer, mpstat_options):
         self.cpu_filter = cpu_filter
         self.printer = printer
         self.mpstat_options = mpstat_options
 
-    def print_report(self, timestamp):
+    def print_report(self, cpu_utils, timestamp):
         self.printer("%10s\t%3s\t%5s\t%6s\t%5s\t%8s\t%5s\t%6s\t%7s\t%7s\t%6s\t%6s"%("Timestamp","CPU","%usr","%nice","%sys","%iowait","%irq","%soft","%steal","%guest","%nice","%idle"))
         if self.mpstat_options.cpu_list == "ALL" or self.mpstat_options.cpu_list is None:
-            cpu_util = self.cpu_util.get_totalcpu_util()
+            cpu_util = cpu_utils.get_totalcpu_util()
             self.printer("%10s\t%3s\t%5s\t%6s\t%5s\t%8s\t%5s\t%6s\t%7s\t%7s\t%6s\t%6s"%(timestamp,"ALL", cpu_util.user_time(), cpu_util.nice_time(), cpu_util.sys_time(), cpu_util.iowait_time(), cpu_util.irq_hard(), cpu_util.irq_soft(), cpu_util.steal(), cpu_util.guest_time(), cpu_util.guest_nice(), cpu_util.idle_time()))
 
-        cpu_util_list = self.cpu_filter.filter_cpus(self.cpu_util.get_percpu_util())
+        cpu_util_list = self.cpu_filter.filter_cpus(cpu_utils.get_percpu_util())
         for cpu_util in cpu_util_list:
             self.printer("%10s\t%3s\t%5s\t%6s\t%5s\t%8s\t%5s\t%6s\t%7s\t%7s\t%6s\t%6s"%(timestamp, cpu_util.cpu_number(), cpu_util.user_time(), cpu_util.nice_time(), cpu_util.sys_time(), cpu_util.iowait_time(), cpu_util.irq_hard(), cpu_util.irq_soft(), cpu_util.steal(), cpu_util.guest_time(), cpu_util.guest_nice(), cpu_util.idle_time()))
 
@@ -442,6 +441,9 @@ class DisplayOptions:
 class MpstatReport(pmcc.MetricGroupPrinter):
     Machine_info_count = 0
 
+    def __init__(self, cpu_util_reporter):
+        self.cpu_util_reporter = cpu_util_reporter
+
     def timeStampDelta(self, group):
         s = group.timestamp.tv_sec - group.prevTimestamp.tv_sec
         u = group.timestamp.tv_usec - group.prevTimestamp.tv_usec
@@ -471,9 +473,7 @@ class MpstatReport(pmcc.MetricGroupPrinter):
 
         if display_options.display_cpu_usage_summary():
             cpu_util = CpuUtil(interval_in_seconds, metric_repository)
-            cpu_filter = CpuFilter(MpstatOptions)
-            reporter = CpuUtilReporter(cpu_util, cpu_filter, none_handler_printer.Print, MpstatOptions)
-            reporter.print_report(timestamp[3])
+            self.cpu_util_reporter.print_report(cpu_util, timestamp[3])
         if display_options.display_total_cpu_usage():
             total_interrupt_usage = TotalInterruptUsage(interval_in_seconds, metric_repository)
             reporter = TotalInterruptUsageReporter(total_interrupt_usage, none_handler_printer.Print, MpstatOptions)
@@ -500,11 +500,16 @@ if __name__ == '__main__':
     MPSTAT_METRICS += Interrupts_list
     MPSTAT_METRICS += Soft_Interrupts_list
 
+    stdout = StdoutPrinter()
+    none_handler_printer = NoneHandlingPrinterDecorator(stdout.Print)
+    cpu_filter = CpuFilter(MpstatOptions)
+    cpu_util_reporter = CpuUtilReporter(cpu_filter, none_handler_printer.Print, MpstatOptions)
+
     try:
         opts = MpstatOptions()
         manager = pmcc.MetricGroupManager.builder(opts,sys.argv)
         manager['mpstat'] = MPSTAT_METRICS
-        manager.printer = MpstatReport()
+        manager.printer = MpstatReport(cpu_util_reporter)
         sts = manager.run()
         sys.exit(sts)
     except pmapi.pmErr as pmerror:
