@@ -28,12 +28,12 @@ class TestHardInterruptUsageReporter(unittest.TestCase):
         interrupt_usage.get_percpu_interrupts = Mock(return_value = cpu_interrupts)
         cpu_filter = Mock()
         cpu_filter.filter_cpus = Mock(return_value = cpu_interrupts)
-        report = InterruptUsageReporter(interrupt_usage, cpu_filter, printer, options)
+        report = InterruptUsageReporter(cpu_filter, printer, options)
         timestamp = '2016-7-18 IST'
         calls = [call(' Timestamp\t cpu\tSOME_INTERRUPT/s\tANOTHER_INTERRUPT/s\t'),
                 call('2016-7-18 IST\t   0\t            1.23\t               2.34\t')]
 
-        report.print_report(timestamp)
+        report.print_report(interrupt_usage, timestamp)
 
         printer.assert_has_calls(calls, any_order = False)
 
@@ -45,12 +45,12 @@ class TestHardInterruptUsageReporter(unittest.TestCase):
         interrupt_usage.get_percpu_interrupts = Mock(return_value = cpu_interrupts)
         cpu_filter = Mock()
         cpu_filter.filter_cpus = Mock(return_value = [self.cpu_interrupt_zero])
-        report = InterruptUsageReporter(interrupt_usage, cpu_filter, printer, options)
+        report = InterruptUsageReporter(cpu_filter, printer, options)
         timestamp = '2016-7-18 IST'
         calls = [call(' Timestamp\t cpu\tSOME_INTERRUPT/s\tANOTHER_INTERRUPT/s\t'),
                 call('2016-7-18 IST\t   0\t            1.23\t               2.34\t')]
 
-        report.print_report(timestamp)
+        report.print_report(interrupt_usage, timestamp)
 
         printer.assert_has_calls(calls, any_order = False)
 if __name__ == '__main__':

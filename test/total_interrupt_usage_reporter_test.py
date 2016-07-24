@@ -10,9 +10,9 @@ class TestTotalInterruptUsageReporter(unittest.TestCase):
         total_interrupt_usage.total_interrupt_per_delta_time = Mock(return_value = 1.23)
         options = Mock()
         printer = Mock()
-        report = TotalInterruptUsageReporter(total_interrupt_usage, printer, options)
+        report = TotalInterruptUsageReporter(printer, options)
 
-        report.print_report(timestamp)
+        report.print_report(total_interrupt_usage, timestamp)
 
         printer.assert_called_with('2016-19-07 IST\t  all\t 1.23')
 
