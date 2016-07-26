@@ -97,5 +97,48 @@ class TestCpuUtilReporter(unittest.TestCase):
 
         printer.assert_has_calls(calls)
 
+    def test_print_report_if_header_prints_once(self):
+        options = Mock()
+        cpu_filter = Mock()
+        cpu_filter.filter_cpus = Mock(return_value = [self.cpu_usage_1])
+        printer = Mock()
+        cpu_util = Mock()
+        cpu_util.get_totalcpu_util = Mock(return_value = self.cpu_usage_total)
+        timestamp = '2016-7-18 IST'
+        report = CpuUtilReporter(cpu_filter, printer, options)
+
+        report.print_report(cpu_util, timestamp)
+        report.print_report(cpu_util, timestamp)
+
+        calls = [call(' Timestamp\tCPU\t %usr\t %nice\t %sys\t %iowait\t %irq\t %soft\t %steal\t %guest\t %nice\t %idle'),
+        call('2016-7-18 IST\t  1\t 1.43\t  2.35\t 2.45\t    3.76\t 6.45\t  2.58\t   2.59\t    5.6\t  2.34\t  6.67'),
+        call('2016-7-18 IST\t  1\t 1.43\t  2.35\t 2.45\t    3.76\t 6.45\t  2.58\t   2.59\t    5.6\t  2.34\t  6.67')]
+
+        printer.assert_has_calls(calls)
+
+    def test_print_report_if_header_prints_every_time_if_ALL_used(self):
+        options = Mock()
+        options.cpu_list = "ALL"
+        cpu_filter = Mock()
+        cpu_filter.filter_cpus = Mock(return_value = [self.cpu_usage_1])
+        printer = Mock()
+        cpu_util = Mock()
+        cpu_util.get_totalcpu_util = Mock(return_value = self.cpu_usage_total)
+        timestamp = '2016-7-18 IST'
+        report = CpuUtilReporter(cpu_filter, printer, options)
+
+        report.print_report(cpu_util, timestamp)
+        report.print_report(cpu_util, timestamp)
+
+        calls = [call(' Timestamp\tCPU\t %usr\t %nice\t %sys\t %iowait\t %irq\t %soft\t %steal\t %guest\t %nice\t %idle'),
+        call('2016-7-18 IST\tALL\t 1.23\t  2.34\t 3.45\t    4.56\t 5.67\t  6.78\t   7.89\t    8.9\t  1.34\t  2.45'),
+        call('2016-7-18 IST\t  1\t 1.43\t  2.35\t 2.45\t    3.76\t 6.45\t  2.58\t   2.59\t    5.6\t  2.34\t  6.67'),
+        call(' Timestamp\tCPU\t %usr\t %nice\t %sys\t %iowait\t %irq\t %soft\t %steal\t %guest\t %nice\t %idle'),
+        call('2016-7-18 IST\tALL\t 1.23\t  2.34\t 3.45\t    4.56\t 5.67\t  6.78\t   7.89\t    8.9\t  1.34\t  2.45'),
+        call('2016-7-18 IST\t  1\t 1.43\t  2.35\t 2.45\t    3.76\t 6.45\t  2.58\t   2.59\t    5.6\t  2.34\t  6.67')]
+
+        printer.assert_has_calls(calls)
+
+
 if __name__ == "__main__":
     unittest.main()
