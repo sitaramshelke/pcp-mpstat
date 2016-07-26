@@ -89,7 +89,10 @@ class MetricRepository:
         if instance is not None:
             return dict(map(lambda x: (x[0].inst, x[2]), self.group[metric].netPrevValues))
         else:
-            return self.group[metric].netPrevValues[0][2]
+            if self.group[metric].netPrevValues == []:
+                return None
+            else:
+                return self.group[metric].netPrevValues[0][2]
 
 
 class CoreCpuUtil:
@@ -469,10 +472,13 @@ class MpstatReport(pmcc.MetricGroupPrinter):
 
     def report(self,manager):
         group = manager['mpstat']
+        if group['kernel.all.cpu.user'].netPrevValues == None:
+            # need two fetches to report rate converted counter metrics
+            return
+
         if self.Machine_info_count == 0:
             self.print_machine_info(group)
             self.Machine_info_count = 1
-            return  #to get prev timestamp value not none
 
         timestamp = group.contextCache.pmCtime(int(group.timestamp)).rstrip().split()
         interval_in_seconds = self.timeStampDelta(group)
