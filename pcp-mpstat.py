@@ -435,7 +435,7 @@ class DisplayOptions:
         self.mpstatoptions = mpstatoptions
 
     def display_cpu_usage_summary(self):
-        return self.mpstatoptions.no_options or (self.mpstatoptions.cpu_filter and not self.mpstatoptions.interrupts_filter)
+        return self.mpstatoptions.no_options or self.mpstatoptions.interrupt_type == "ALL" or (self.mpstatoptions.cpu_filter and not self.mpstatoptions.interrupts_filter)
 
     def display_total_cpu_usage(self):
         return self.mpstatoptions.interrupts_filter and (self.mpstatoptions.interrupt_type == "SUM" or self.mpstatoptions.interrupt_type == "ALL")
