@@ -1,0 +1,9 @@
+Log for pmlogger on ram-Lenovo started Tue Jul 26 16:54:42 2016
+
+preprocessor cmd: /usr/lib/pcp/bin/pmcpp -rs pcp-mpstat-pmlogger-config.txt -I /var/lib/pcp/config/pmlogger
+Config parsed
+Starting logger for host "ram-Lenovo" via "local:"
+Archive basename: pcp-mpstat
+pmlogger: Sample limit reached, exiting
+
+Log finished Tue Jul 26 16:54:45 2016
