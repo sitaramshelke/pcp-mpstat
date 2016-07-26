@@ -9,8 +9,8 @@ MPSTAT_METRICS = ['pmda.uname', 'hinv.map.cpu_num', 'hinv.ncpu', 'hinv.cpu.onlin
                 'kernel.percpu.cpu.wait.total', 'kernel.percpu.cpu.irq.hard', 'kernel.percpu.cpu.irq.soft',
                 'kernel.percpu.cpu.steal', 'kernel.percpu.cpu.guest','kernel.percpu.cpu.guest_nice',
                 'kernel.percpu.cpu.idle', 'kernel.all.intr']
-Interrupts_list = []
-Soft_Interrupts_list = []
+interrupts_list = []
+soft_interrupts_list = []
 
 class StdoutPrinter:
     def Print(self, args):
@@ -327,7 +327,10 @@ class CpuUtilReporter:
             self.header_print = True
         if self.mpstat_options.cpu_list == "ALL" or self.mpstat_options.cpu_list is None:
             cpu_util = cpu_utils.get_totalcpu_util()
-            self.printer("%10s\t%3s\t%5s\t%6s\t%5s\t%8s\t%5s\t%6s\t%7s\t%7s\t%6s\t%6s"%(timestamp,"ALL", cpu_util.user_time(), cpu_util.nice_time(), cpu_util.sys_time(), cpu_util.iowait_time(), cpu_util.irq_hard(), cpu_util.irq_soft(), cpu_util.steal(), cpu_util.guest_time(), cpu_util.guest_nice(), cpu_util.idle_time()))
+            self.printer("%10s\t%3s\t%5s\t%6s\t%5s\t%8s\t%5s\t%6s\t%7s\t%7s\t%6s\t%6s"%(timestamp,"ALL",
+            cpu_util.user_time(), cpu_util.nice_time(), cpu_util.sys_time(), cpu_util.iowait_time(),
+            cpu_util.irq_hard(), cpu_util.irq_soft(), cpu_util.steal(), cpu_util.guest_time(),
+            cpu_util.guest_nice(), cpu_util.idle_time()))
 
         cpu_util_list = self.cpu_filter.filter_cpus(cpu_utils.get_percpu_util())
         for cpu_util in cpu_util_list:
@@ -474,8 +477,6 @@ class MpstatReport(pmcc.MetricGroupPrinter):
         timestamp = group.contextCache.pmCtime(int(group.timestamp)).rstrip().split()
         interval_in_seconds = self.timeStampDelta(group)
         metric_repository = MetricRepository(group)
-        stdout = StdoutPrinter()
-        none_handler_printer = NoneHandlingPrinterDecorator(stdout.Print)
         display_options = DisplayOptions(MpstatOptions)
 
         if display_options.display_cpu_usage_summary():
@@ -485,22 +486,22 @@ class MpstatReport(pmcc.MetricGroupPrinter):
             total_interrupt_usage = TotalInterruptUsage(interval_in_seconds, metric_repository)
             self.total_interrupt_usage_reporter.print_report(total_interrupt_usage, timestamp[3])
         if display_options.display_hard_interrupt_usage():
-            hard_interrupt_usage = HardInterruptUsage(interval_in_seconds, metric_repository, Interrupts_list)
+            hard_interrupt_usage = HardInterruptUsage(interval_in_seconds, metric_repository, interrupts_list)
             self.interrupt_usage_reporter.print_report(hard_interrupt_usage,timestamp[3])
         if display_options.display_soft_interrupt_usage():
-            soft_interrupt_usage = SoftInterruptUsage(interval_in_seconds, metric_repository, Soft_Interrupts_list)
+            soft_interrupt_usage = SoftInterruptUsage(interval_in_seconds, metric_repository, soft_interrupts_list)
             self.interrupt_usage_reporter.print_report(soft_interrupt_usage, timestamp[3])
 
 
 
 
 if __name__ == '__main__':
-    Interrupts = NamedInterrupts('kernel.percpu.interrupts')
-    Soft_Interrupts = NamedInterrupts('kernel.percpu.softirqs')
-    Interrupts_list = Interrupts.get_all_named_interrupt_metrics()
-    Soft_Interrupts_list = Soft_Interrupts.get_all_named_interrupt_metrics()
-    MPSTAT_METRICS += Interrupts_list
-    MPSTAT_METRICS += Soft_Interrupts_list
+    interrupts = NamedInterrupts('kernel.percpu.interrupts')
+    soft_interrupts = NamedInterrupts('kernel.percpu.softirqs')
+    interrupts_list = interrupts.get_all_named_interrupt_metrics()
+    soft_interrupts_list = soft_interrupts.get_all_named_interrupt_metrics()
+    MPSTAT_METRICS += interrupts_list
+    MPSTAT_METRICS += soft_interrupts_list
 
     stdout = StdoutPrinter()
     none_handler_printer = NoneHandlingPrinterDecorator(stdout.Print)
