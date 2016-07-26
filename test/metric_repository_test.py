@@ -130,5 +130,17 @@ class MetricRepositoryTest(unittest.TestCase):
 
         self.assertEquals(fetch_call_count,0)
 
+    def test_return_none_if_netprevvalue_returns_empty_list(self):
+        utime_mock = Mock(
+            netValues = [(Mock(inst=111),'dummyprocess',12345)],
+            netPrevValues = []
+        )
+        group = {'kernel.percpu.cpu.user':utime_mock}
+        m_repo = MetricRepository(group)
+
+        c_utime = m_repo.previous_value('kernel.percpu.cpu.user',111)
+
+        self.assertIsNone(c_utime)
+
 if __name__ == "__main__":
     unittest.main()
