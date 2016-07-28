@@ -100,6 +100,8 @@ class CoreCpuUtil:
         self.instance = instance
         self.metric_repository = metric_repository
 
+    def total_cpus(self):
+        return self.metric_repository.current_value('hinv.ncpu', None)
     def cpu_number(self):
         return self.instance
 
@@ -111,7 +113,12 @@ class CoreCpuUtil:
         p_time = self.metric_repository.previous_value(metric, self.instance)
         c_time = self.metric_repository.current_value(metric, self.instance)
         if p_time is not None and c_time is not None:
-            return float("%.2f"%((100*(c_time - p_time))/(1000*self.delta_time)))
+            value = (100*(c_time - p_time))/(1000*self.delta_time)
+            if self.instance is None:
+                return float("%.2f"%(value/self.total_cpus()))
+            else:
+                return float("%.2f"%(value))
+
         else:
             return None
 
@@ -120,7 +127,11 @@ class CoreCpuUtil:
         p_time = self.metric_repository.previous_value(metric, self.instance)
         c_time = self.metric_repository.current_value(metric, self.instance)
         if p_time is not None and c_time is not None:
-            return float("%.2f"%((100*(c_time - p_time))/(1000*self.delta_time)))
+            value = (100*(c_time - p_time))/(1000*self.delta_time)
+            if self.instance is None:
+                return float("%.2f"%(value/self.total_cpus()))
+            else:
+                return float("%.2f"%(value))
         else:
             return None
 
@@ -129,7 +140,11 @@ class CoreCpuUtil:
         p_time = self.metric_repository.previous_value(metric, self.instance)
         c_time = self.metric_repository.current_value(metric, self.instance)
         if p_time is not None and c_time is not None:
-            return float("%.2f"%((100*(c_time - p_time))/(1000*self.delta_time)))
+            value = (100*(c_time - p_time))/(1000*self.delta_time)
+            if self.instance is None:
+                return float("%.2f"%(value/self.total_cpus()))
+            else:
+                return float("%.2f"%(value))
         else:
             return None
 
@@ -138,7 +153,11 @@ class CoreCpuUtil:
         p_time = self.metric_repository.previous_value(metric, self.instance)
         c_time = self.metric_repository.current_value(metric, self.instance)
         if p_time is not None and c_time is not None:
-            return float("%.2f"%((100*(c_time - p_time))/(1000*self.delta_time)))
+            value = (100*(c_time - p_time))/(1000*self.delta_time)
+            if self.instance is None:
+                return float("%.2f"%(value/self.total_cpus()))
+            else:
+                return float("%.2f"%(value))
         else:
             return None
 
@@ -147,7 +166,11 @@ class CoreCpuUtil:
         p_time = self.metric_repository.previous_value(metric, self.instance)
         c_time = self.metric_repository.current_value(metric, self.instance)
         if p_time is not None and c_time is not None:
-            return float("%.2f"%((100*(c_time - p_time))/(1000*self.delta_time)))
+            value = (100*(c_time - p_time))/(1000*self.delta_time)
+            if self.instance is None:
+                return float("%.2f"%(value/self.total_cpus()))
+            else:
+                return float("%.2f"%(value))
         else:
             return None
 
@@ -156,7 +179,11 @@ class CoreCpuUtil:
         p_time = self.metric_repository.previous_value(metric, self.instance)
         c_time = self.metric_repository.current_value(metric, self.instance)
         if p_time is not None and c_time is not None:
-            return float("%.2f"%((100*(c_time - p_time))/(1000*self.delta_time)))
+            value = (100*(c_time - p_time))/(1000*self.delta_time)
+            if self.instance is None:
+                return float("%.2f"%(value/self.total_cpus()))
+            else:
+                return float("%.2f"%(value))
         else:
             return None
 
@@ -165,7 +192,11 @@ class CoreCpuUtil:
         p_time = self.metric_repository.previous_value(metric, self.instance)
         c_time = self.metric_repository.current_value(metric, self.instance)
         if p_time is not None and c_time is not None:
-            return float("%.2f"%((100*(c_time - p_time))/(1000*self.delta_time)))
+            value = (100*(c_time - p_time))/(1000*self.delta_time)
+            if self.instance is None:
+                return float("%.2f"%(value/self.total_cpus()))
+            else:
+                return float("%.2f"%(value))
         else:
             return None
 
@@ -174,7 +205,11 @@ class CoreCpuUtil:
         p_time = self.metric_repository.previous_value(metric, self.instance)
         c_time = self.metric_repository.current_value(metric, self.instance)
         if p_time is not None and c_time is not None:
-            return float("%.2f"%((100*(c_time - p_time))/(1000*self.delta_time)))
+            value = (100*(c_time - p_time))/(1000*self.delta_time)
+            if self.instance is None:
+                return float("%.2f"%(value/self.total_cpus()))
+            else:
+                return float("%.2f"%(value))
         else:
             return None
 
@@ -183,7 +218,11 @@ class CoreCpuUtil:
         p_time = self.metric_repository.previous_value(metric, self.instance)
         c_time = self.metric_repository.current_value(metric, self.instance)
         if p_time is not None and c_time is not None:
-            return float("%.2f"%((100*(c_time - p_time))/(1000*self.delta_time)))
+            value = (100*(c_time - p_time))/(1000*self.delta_time)
+            if self.instance is None:
+                return float("%.2f"%(value/self.total_cpus()))
+            else:
+                return float("%.2f"%(value))
         else:
             return None
 
@@ -192,7 +231,11 @@ class CoreCpuUtil:
         p_time = self.metric_repository.previous_value(metric, self.instance)
         c_time = self.metric_repository.current_value(metric, self.instance)
         if p_time is not None and c_time is not None:
-            return float("%.2f"%((100*(c_time - p_time))/(1000*self.delta_time)))
+            value = (100*(c_time - p_time))/(1000*self.delta_time)
+            if self.instance is None:
+                return float("%.2f"%(value/self.total_cpus()))
+            else:
+                return float("%.2f"%(value))
         else:
             return None
 
